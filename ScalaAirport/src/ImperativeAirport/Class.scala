@@ -1,5 +1,0 @@
-package ImperativeAirport
-
-class Class {
-
-}
