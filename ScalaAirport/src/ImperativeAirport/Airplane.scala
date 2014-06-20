@@ -4,13 +4,14 @@ package ImperativeAirport
 
 class Airplane (d: Airport, a: Airport, n:String){
 	val name = n;
-	private val departure = d;
+	val departure = d;
 	val arrival = a;
 	private var departed = false;
 	private var arrived = false;
 	
 	def start(){
 	  d.addDeparture(this);
+	  println(name + " aspetta di partire...");
 	}
 	
 	def takeOff(){
