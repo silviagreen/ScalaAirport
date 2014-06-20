@@ -2,6 +2,15 @@ package ImperativeAirport
 
 import scala.collection.mutable.Queue;
 
+/**
+ * Classe che rappresenta una Torre di Controllo di un aeroporto.
+ * Ogni Torre di Controllo gestisce:
+ * 		-la pista dell'aeroporto
+ *   	-la lista degli aerei che attendono di decollare (departuresQueue)
+ *    	-la lista degli aerei che attendono di atterrare (arrivalsQueue)
+ *     tutto secondo la tabella oraria (timetable) dell'aeroporto a cui la torre appartiente.
+ * Quando un aereo è un ritardo, delega un thread per attenderlo e farlo atterrare/decollare non appena la pista si libera.
+ */
 class ControlTower (a:Airport) extends Thread{
 	var airport = a;
 	var nextTransit = "A";

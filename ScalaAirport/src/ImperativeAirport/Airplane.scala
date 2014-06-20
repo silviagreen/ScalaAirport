@@ -1,6 +1,14 @@
 package ImperativeAirport
 
-
+/**
+ * Classe che Rappresenta un Aereo
+ * Ogni Aereo ha:
+ * 		-nome
+ *   	-aeroporto di partenza
+ *    	-aeroporto di arrivo
+ * Un'aereo decolla (takeOff) e atterra (landing).
+ * Quando un aereo deve decollare, lo comunica all'aeroporto di partenza
+ */
 
 class Airplane (d: Airport, a: Airport, n:String){
 	val name = n;

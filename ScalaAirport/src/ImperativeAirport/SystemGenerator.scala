@@ -3,9 +3,25 @@ package ImperativeAirport
 import scala.collection.mutable.ListBuffer;
 import scala.util.Random;
 
+
+/**
+ * Genera il sistema di aeroporti.
+ * Occorre dare in input il numero di aeroporti e aerei da creare.
+ * Durante la creazione degli aerei crea la timetable degli aeroporti.
+ * A fine creazione, delega a due thread l'attivazione di aerei e aeroporti.
+ */
 object SystemGenerator {
 
+  def isAllDigits(x: String) = x forall Character.isDigit
+  
   def main(args: Array[String]): Unit = { 
+    
+    if(args.size < 2)
+      println("Inserire due parametri numerici");
+    else
+      if(!isAllDigits(args(0)) || !isAllDigits(args(1)))
+        println("Inserire due parametri numerici");
+      else{
     val nAirport = args(0).toInt;
     val nPlanes = args(1).toInt;
     var airportList = ListBuffer[Airport]();
@@ -56,5 +72,5 @@ object SystemGenerator {
     
     
   }
-
+  }
 }

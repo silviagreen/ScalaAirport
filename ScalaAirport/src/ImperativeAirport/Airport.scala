@@ -2,6 +2,15 @@ package ImperativeAirport
 
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Classe che rappresenta un Aeroporto
+ * Ogni Aerporto ha:
+ * 		-un nome
+ *   	-una pista di decollo/atterraggio (track)
+ *    	-la tabella dei decolli e atterraggi, in ordine di orario (timetable)
+ *     	-la torre di controllo, che gestisce la pista
+ * Quando un Aeroporto deve far atterrare/decollare un aereo, fa richiesta alla torre di controllo
+ */
 class Airport (n:String){
 	val name = n;
 	var track = new Object();	//pista d'atterraggio
@@ -20,7 +29,7 @@ class Airport (n:String){
 	
 	def activate() = {
 	  controlTower.start();
-	  println("Torre di Controllo aeroporto " + name + " attivata" );
+	  println("Torre di Controllo aeroporto di " + name + " attivata" );
 	}
 	
 	def getTimeTable():ArrayBuffer[String] = {
