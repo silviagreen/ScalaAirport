@@ -5,8 +5,8 @@ import scala.util.Random;
 
 object SystemGenerator {
 
-  def main(args: Array[String]): Unit = {
-    val nAirport = 5;//Integer.getInteger(args(0));
+  def main(args: Array[String]): Unit = { 
+    val nAirport = args(0).toInt;
     var airportList = ListBuffer[Airport]();
     val planeList = ListBuffer[Airplane]();
     
