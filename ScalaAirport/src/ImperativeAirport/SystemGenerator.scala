@@ -7,6 +7,7 @@ object SystemGenerator {
 
   def main(args: Array[String]): Unit = { 
     val nAirport = args(0).toInt;
+    val nPlanes = args(1).toInt;
     var airportList = ListBuffer[Airport]();
     val planeList = ListBuffer[Airplane]();
     
@@ -20,7 +21,7 @@ object SystemGenerator {
     
     println("---------------TIME TABLE----------------")
     println("NOME\t PARTENZA\t ARRIVO\t");
-    while(i <= 20){
+    while(i <= nPlanes){
       airportList = Random.shuffle(airportList.toList).to[ListBuffer]; 
       var plane = new Airplane(airportList(0), airportList(1), "aereo" + i);
 
