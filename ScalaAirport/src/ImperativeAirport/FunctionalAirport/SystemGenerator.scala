@@ -26,10 +26,22 @@ class Airport(n:String){
 
 class ControlTower(a:Airport) extends Actor{
 	val airport = a
+	var index = 0
 	def receive = {
-	  case ("D",p:Plane) => a.pista ! p.name + " decolla";
-			  				self ! ("A", p)
-	  case ("A", p:Plane) => a.pista ! p.name + " atterra";
+	  case ("D",p:Plane) => if(a.timetable(index).equals("D")){
+		  						a.pista ! p.name + " decolla";
+		  						self ! ("A", p)
+		  						index = index + 1 
+	  						}else{
+	  						  self ! ("D", p)
+	  						}
+	    
+	  case ("A", p:Plane) => if(a.timetable(index).equals("A")){
+	    						a.pista ! p.name + " atterra";
+	    						index = index + 1
+	  							}else{
+	  							  self ! ("A", p)
+	  							}
 	}
 }
 
@@ -53,7 +65,6 @@ object SystemGenerator {
        
        for(i <- 0 to 2/*args(0).toInt*/){
     	airports += new Airport("aeroporto" + i)
-    	//airports(i - 1).start();
 	  println(airports(i).name)
      }
   	}
