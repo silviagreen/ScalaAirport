@@ -15,7 +15,7 @@ import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
 
 
-class Aereo(p:Aeroporto, a:Aeroporto, n:String){
+class Aereo(p: Aeroporto, a:Aeroporto, n:String){
   
   private val _name = n
   private val _partenza = p
@@ -33,22 +33,6 @@ case class ChiediAtterraggio(a:Aereo)
 case object FaiDecollare
 case object FaiAtterrare
 
-/*class TorreControllo(a:Aeroporto) extends Actor{
-  private val aeroporto = a
-  def receive = {
-    case FaiDecollare =>
-      if(aeroporto.partenze.isEmpty){
-    						aeroporto.addRitardoInPartenza
-    						}
-    					 else
-    					   aeroporto.pista ! Decolla(aeroporto.partenze.dequeue)
-    case FaiAtterrare => if(aeroporto.arrivi.isEmpty)
-    						aeroporto.addRitardoInArrivo
-    					 else
-    						aeroporto.pista ! Atterra(aeroporto.arrivi.dequeue)
-    						  
-  }
-}*/
 
 class Pista extends Actor{
   def receive = {
@@ -123,7 +107,6 @@ class Aeroporto(n:String){
 	
 	
 	private val _pista = system.actorOf(Props(new Pista), name = "pista")
-	//private val torreControllo = system.actorOf(Props(new TorreControllo(this)), name = "torre")
 	private val _richiestaDecollo = system.actorOf(Props(new GestoreDecolli(this)), name = "richiestaDecollo")
 	private val _richiestaAtterraggio = system.actorOf(Props(new GestoreAtterraggi(this)), name = "richiestaAtterraggio")
 	
@@ -134,8 +117,8 @@ class Aeroporto(n:String){
 	def proxTransito : Future[Unit] = Future {
 	  timetable foreach { t =>
 	    t match {
-	    case "D" => richiestaDecollo ! FaiDecollare//torreControllo ! FaiDecollare
-	    case "A" => richiestaAtterraggio ! FaiAtterrare//torreControllo ! FaiAtterrare
+	    case "D" => richiestaDecollo ! FaiDecollare
+	    case "A" => richiestaAtterraggio ! FaiAtterrare
 	  }
 	  }
 	}

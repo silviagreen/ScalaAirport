@@ -2,14 +2,33 @@ package FunctionalAirport2
 
 import scala.util.Random
 
+
+
 object Simulazione {
+  
+  def isAllDigits(x: String) = x forall Character.isDigit
+    
+  def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String, correctType: String=>Boolean): Boolean = {
+    if(args.size < 2){
+      println("Errore: Sono richiesti due parametri numerici")
+      false
+    }
+    else{
+      if(!correctType(nAeroporti) || !correctType(nAerei)){
+        println("Errore: inseriti parametri non numerici")
+        false
+      }else true
+    }
+  }
   
   var i = 0
   var j = 0
 
   def main(args: Array[String]): Unit = {
-    val nAeroporti = 2//args(0).toInt
-    val nAerei = 2//args(1).toInt
+    val nAeroporti = args(0).toInt
+    val nAerei = args(1).toInt
+    
+    if(checkParameters(args, args(0), args(1), isAllDigits)){
     
     val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
       										new Aeroporto("Aeroporto" + (i))}
@@ -29,6 +48,9 @@ object Simulazione {
     }
     aeroporti foreach (a => a.start)
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
+  
+  }else{
+    println("La simulazione non può partire")
   }
-
+  }
 }
