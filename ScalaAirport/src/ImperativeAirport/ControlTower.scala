@@ -52,6 +52,7 @@ class ControlTower (a:Airport) extends Thread{
 		  a.track.synchronized{
 		    p.takeOff();
 		  }
+		  Thread.sleep(200);
 		  p.arrival.addArrival(p);
 	  }
 	}

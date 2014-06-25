@@ -11,9 +11,9 @@ package ImperativeAirport
  */
 
 class Airplane (d: Airport, a: Airport, n:String){
-	val name = n;
-	val departure = d;
-	val arrival = a;
+	var name = n;
+	var departure = d;
+	var arrival = a;
 	private var departed = false;
 	private var arrived = false;
 	

@@ -22,10 +22,10 @@ object SystemGenerator {
       if(!isAllDigits(args(0)) || !isAllDigits(args(1)))
         println("Inserire due parametri numerici");
       else{
-    val nAirport = args(0).toInt;
-    val nPlanes = args(1).toInt;
+    var nAirport = args(0).toInt;
+    var nPlanes = args(1).toInt;
     var airportList = ListBuffer[Airport]();
-    val planeList = ListBuffer[Airplane]();
+    var planeList = ListBuffer[Airplane]();
     
     println("N_AEROPORTI: " + nAirport);
     for(i <- 1 to nAirport){
