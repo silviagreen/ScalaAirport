@@ -1,6 +1,9 @@
-package FunctionalAirport2
+package Fun2Meglio
+
 
 import scala.util.Random
+
+import akka.actor.actorRef2Scala
 
 
 
@@ -27,12 +30,12 @@ object Simulazione {
   def main(args: Array[String]): Unit = {
    
     
-    if(checkParameters(args, args(0), args(1), isAllDigits)){
+    if(checkParameters(args, args(0), args(1), isAllDigits)) {
        val nAeroporti = args(0).toInt
     val nAerei = args(1).toInt
     
-    val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
-      										new Aeroporto("Aeroporto" + (i))}
+     val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
+      										new Aeroporto2("Aeroporto" + (i))}
     
    /* for(i <- aeroporti)
       println(i.nome)*/
@@ -49,7 +52,7 @@ object Simulazione {
     }
     aeroporti foreach (a => a.start)
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
-  
+ 
   }else{
     println("La simulazione non può partire")
   }
