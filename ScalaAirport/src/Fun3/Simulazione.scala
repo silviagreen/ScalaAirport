@@ -28,23 +28,23 @@ object Simulazione {
    
     
     if(checkParameters(args, args(0), args(1), isAllDigits)){
-     val nAeroporti = args(0).toInt
-    val nAerei = args(1).toInt
-    val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
-      										new Aeroporto("Aeroporto" + (i))}
+    	val nAeroporti = args(0).toInt
+    	val nAerei = args(1).toInt
+    	val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
+      											  new Aeroporto("Aeroporto" + (i))}
     
    /* for(i <- aeroporti)
       println(i.nome)*/
     
-    var index = List.range(0, nAeroporti, 1)
+    val index = List.range(0, nAeroporti, 1)
     println("NOME\t PARTENZA\t ARRIVO")
     val aerei = 1 to nAerei map{
-      _ => index = Random.shuffle(index)
+      _ => val idx = Random.shuffle(index)
     	   j = j + 1
-    	   aeroporti(index(0)).timetable += "D"
-    	   aeroporti(index(1)).timetable += "A"
-    	   println("aereo" + j + "\t" + aeroporti(index(0)).nome + "\t" + aeroporti(index(1)).nome)
-    	   new Aereo(aeroporti(index(0)), aeroporti(index(1)), "aereo" + j)  
+    	   aeroporti(idx(0)).timetable += "D"
+    	   aeroporti(idx(1)).timetable += "A"
+    	   println("aereo" + j + "\t" + aeroporti(idx(0)).nome + "\t" + aeroporti(idx(1)).nome)
+    	   new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), "aereo" + j)  
     }
     aeroporti foreach (a => a.start)
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)

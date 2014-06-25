@@ -46,26 +46,19 @@ class Pista extends Actor{
 class GestoreAtterraggi(a:Aeroporto2) extends Actor{
   private val aeroporto = a
   private val _arrivi = Queue[Aereo]()
-	
-	private var _ritardiInArrivi = 0
-	
-	
-	
-	def arrivi = _arrivi
-	
-	def ritardiInArrivi = _ritardiInArrivi
-	
-	
-	def addRitardoInArrivo = {_ritardiInArrivi = _ritardiInArrivi + 1}
-	
-	def removeRitardoInArrivo = {_ritardiInArrivi = _ritardiInArrivi - 1}
+  private var _ritardiInArrivi = 0
+  def arrivi = _arrivi
+  def ritardiInArrivi = _ritardiInArrivi
+  def addRitardoInArrivo = {_ritardiInArrivi = _ritardiInArrivi + 1}
+  def removeRitardoInArrivo = {_ritardiInArrivi = _ritardiInArrivi - 1}
+  
   def receive = {
     case ChiediAtterraggio(p:Aereo) =>  arrivi += p
-    									   if(ritardiInArrivi > 0){
+    									if(ritardiInArrivi > 0){
     									     println("restano " + ritardiInArrivi + "ritardi in atterraggio")
-    										   aeroporto.pista ! Atterra(p)
-    										   removeRitardoInArrivo
-    									   }
+    										 aeroporto.pista ! Atterra(p)
+    										 removeRitardoInArrivo
+    									}
     case FaiAtterrare => if(arrivi.isEmpty){
     						//println("nuovo ritardo in atterraggio")
     						addRitardoInArrivo
@@ -87,17 +80,14 @@ class GestoreDecolli(a:Aeroporto2) extends Actor{
   
   def receive = {
     case ChiediDecollo(p:Aereo) => //println("Accodo in decollo")
-      										partenze += p
-    									   if(ritardiInPartenza > 0){
-    									     //println("Parte subito")
-    										   aeroporto.pista ! Decolla(p)
-    										   removeRitardoInPartenza
-    										   //println("ci sono ancora " + ritardiInPartenza + "ritardi")
-    									   }
+      								partenze += p
+    								if(ritardiInPartenza > 0){
+    									aeroporto.pista ! Decolla(p)
+    									removeRitardoInPartenza }
     case FaiDecollare => if(partenze.isEmpty){
     						//println("Nuovo ritardi in decollo")
     						addRitardoInPartenza
-    						}		
+    					}		
     					 else
     						aeroporto.pista ! Decolla(partenze.dequeue)
   }
@@ -110,10 +100,7 @@ class Aeroporto2(n:String){
 	
 	private val _nome = n
 	def nome = _nome
-	
-	
-	
-	
+
 	private val _pista = system.actorOf(Props(new Pista), name = "pista")
 	private val _richiestaDecollo = system.actorOf(Props(new GestoreDecolli(this)), name = "richiestaDecollo")
 	private val _richiestaAtterraggio = system.actorOf(Props(new GestoreAtterraggi(this)), name = "richiestaAtterraggio")

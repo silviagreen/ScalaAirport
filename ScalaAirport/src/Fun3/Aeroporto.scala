@@ -40,7 +40,7 @@ class Pista extends Actor{
   def receive = {
     case Decolla(a:Aereo) =>//a.arrivo.richiestaAtterraggio(a) 
       						println(a.name + " decolla da " + a.partenza.nome)
-      						 a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
+      						a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
     						
     case Atterra(a:Aereo) => println(a.name + " atterra a " + a.arrivo.nome)
   }
@@ -49,8 +49,7 @@ class Pista extends Actor{
 class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
   private val aeroporto = a
   
-  def receive = {
-									   
+  def receive = {								   
     case FaiAtterrare => 
       unstashAll
       context.become({
@@ -69,10 +68,7 @@ class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
 class GestoreDecolli(a:Aeroporto) extends Actor with Stash{
   private val aeroporto = a
  
-  def receive = {
-    
-    										   
-    										
+  def receive = { 										
     case FaiDecollare => 
       unstashAll
       context.become({
@@ -90,15 +86,10 @@ class GestoreDecolli(a:Aeroporto) extends Actor with Stash{
 class Aeroporto(n:String){
   
 	implicit val system = ActorSystem("planes")
-	val timetable = ListBuffer[String]()
-	
+	val timetable = ListBuffer[String]()	
 	private val _nome = n
-
-
-	
 	def nome = _nome
 
-	
 	private val _pista = system.actorOf(Props(new Pista), name = "pista")
 	private val _richiestaDecollo = system.actorOf(Props(new GestoreDecolli(this)), name = "richiestaDecollo")
 	private val _richiestaAtterraggio = system.actorOf(Props(new GestoreAtterraggi(this)), name = "richiestaAtterraggio")
