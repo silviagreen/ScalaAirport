@@ -24,7 +24,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import akka.util.Timeout
 
- 
 
 
 class Aereo(p: Aeroporto, a:Aeroporto, n:String){
@@ -38,17 +37,18 @@ class Aereo(p: Aeroporto, a:Aeroporto, n:String){
   def arrivo = _arrivo
 }
 //Messaggi
-case class Decolla(a:Aereo){
+abstract class Messaggi
+case class Decolla(a:Aereo) extends Messaggi{
   val aereo = a
 }
-case class Atterra(a:Aereo){
+case class Atterra(a:Aereo) extends Messaggi{
   val aereo = a
 }
-case class ChiediDecollo(a:Aereo)
-case class ChiediAtterraggio(a:Aereo)
-case object FaiDecollare
-case object FaiAtterrare
-case class UsaPista(m:String)
+case class ChiediDecollo(a:Aereo) extends Messaggi
+case class ChiediAtterraggio(a:Aereo) extends Messaggi
+case object FaiDecollare extends Messaggi
+case object FaiAtterrare extends Messaggi
+case class UsaPista(m:String) extends Messaggi
 
 class Pista extends Actor{
   def receive = {
@@ -57,7 +57,7 @@ class Pista extends Actor{
   
 }
 
-class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
+class GestoreAtterraggi(a:Aeroporto) extends Actor{
   private val aeroporto = a
   private var arrivi = Queue[Aereo]()
   private var ritardiA = 0
@@ -65,9 +65,9 @@ class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
   def receive = {								   
     case ChiediAtterraggio(a:Aereo) => val mittente = sender//println(ritardiA + " in " + aeroporto.nome)
     ritardiA match {
-      case 0 => println("accoda " + a.name + " in " + aeroporto.nome)
+      case 0 => //println("accoda " + a.name + " in " + aeroporto.nome)
         arrivi += a
-      case x if x > 0 =>	println("c'è un ritardo " + a.name + " parte subito")
+      case x if x > 0 =>	//println("c'è un ritardo " + a.name + " parte subito")
       						(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.partenza.nome)
       
     		  				ritardiA = ritardiA - 1
@@ -76,7 +76,7 @@ class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
     case FaiAtterrare => 
        val mittente = sender
     Try(arrivi.dequeue) match{
-      case Success(aereo) => println(aereo.name + "atterra")
+      case Success(aereo) => //println(aereo.name + "atterra")
       mittente ! Some(aereo)
       case Failure(f) => 
         ritardiA = ritardiA + 1
@@ -87,7 +87,7 @@ class GestoreAtterraggi(a:Aeroporto) extends Actor with Stash{
   }
 }
 
-class GestoreDecolli(a:Aeroporto) extends Actor with Stash{
+class GestoreDecolli(a:Aeroporto) extends Actor{
   private val aeroporto = a
   private var partenze = Queue[Aereo]()
   private var ritardi = 0
@@ -116,7 +116,8 @@ class GestoreDecolli(a:Aeroporto) extends Actor with Stash{
 class Aeroporto(n:String){
   
 	implicit val system = ActorSystem("planes")
-	val timetable = ListBuffer[String]()	
+	var timetable = List[String]()
+	
 	private val _nome = n
 	def nome = _nome
 
@@ -127,6 +128,8 @@ class Aeroporto(n:String){
 	def pista = _pista
 	def richiestaDecollo = _richiestaDecollo
 	def richiestaAtterraggio = _richiestaAtterraggio
+	
+	def timetable_(l:List[String]) = timetable = l
 	
 	def proxTransito : Future[Unit] = Future {
 	  implicit val timeout = Timeout(10 seconds)
