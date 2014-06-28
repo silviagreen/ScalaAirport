@@ -83,7 +83,7 @@ class GestoreAtterraggi(a:Aeroporto) extends Actor{
       case 0 => //println("accoda " + a.name + " in " + aeroporto.nome)
         arrivi += a
       case x if x > 0 =>	//println("c'è un ritardo " + a.name + " parte subito")
-      						(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.partenza.nome)
+      						(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.arrivo.nome)
       
     		  				ritardiA = ritardiA - 1
       
@@ -145,10 +145,49 @@ class Aeroporto(n:String){
 	def richiestaAtterraggio = _richiestaAtterraggio
 	
 	def timetable_(l:List[String]) = timetable = l
-	
+	/*
 	def proxTransito : Future[Unit] = Future {
 	  implicit val timeout = Timeout(10 seconds)
 	  timetable foreach { t =>
+	    t match {
+	    case "D" => 
+	    			
+	    			  val future = richiestaDecollo ? FaiDecollare
+	    			  val result = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
+	    			result match {
+	    				case Some(a) => pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
+	    				//println("dopo pista")
+	    				//println("chiedo di accodare " + a.name)
+	    								a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
+	    				case None => 
+	    			}
+	    			
+	    			/*val futureAereo = ask(richiestaDecollo, FaiDecollare).mapTo[Option[Aereo]]
+	    			futureAereo.onSuccess{
+	    			  case result => result match {
+	    			    case Some(a) => pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
+	    				println("chiedo di accodare " + a.name)
+	    								a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
+	    				case None => 
+	    			  }
+	    			}*/
+	    			
+	    			
+	    case "A" => val future = richiestaAtterraggio ? FaiAtterrare
+	    			val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
+	    			results match {
+	    				case Some(a) => pista ! UsaPista(a.name + " atterra da " + a.arrivo.nome)
+	    				case None => 
+	    			}
+	    			
+	  }
+	    
+	  }
+	}*/
+	
+	def proxTransito : Future[Unit] = Future {
+	  implicit val timeout = Timeout(10 seconds)
+	  for (t <- timetable) yield{
 	    t match {
 	    case "D" => 
 	    			
