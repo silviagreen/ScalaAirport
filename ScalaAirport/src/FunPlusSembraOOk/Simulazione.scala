@@ -95,7 +95,8 @@ object Simulazione {
      println("\n")
     println("\n")
     
-    aeroporti foreach (a => a.start)
+    aeroporti foreach {a => a.start
+      					Thread.sleep(1500)			}
     
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
   
