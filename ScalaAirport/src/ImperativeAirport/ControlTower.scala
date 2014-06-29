@@ -16,7 +16,7 @@ class ControlTower (a:Airport) extends Thread{
 	var nextTransit = "A";
 	private var arrivalsQueue = new Queue[Airplane];
 	private var departuresQueue = new Queue[Airplane];
-	private val timetable = a.getTimeTable();
+	private val timetable = a.getTimeTable;
 	var i = 4;
 	
 	def addDeparture(p:Airplane) = {

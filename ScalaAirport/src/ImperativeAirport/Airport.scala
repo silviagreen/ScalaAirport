@@ -32,7 +32,7 @@ class Airport (n:String){
 	  println("Torre di Controllo aeroporto di " + name + " attivata" );
 	}
 	
-	def getTimeTable():ArrayBuffer[String] = {
+	def getTimeTable :ArrayBuffer[String] = {
 	  return timetable;
 	}
 	
