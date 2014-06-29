@@ -5,22 +5,20 @@ import scala.concurrent._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import akka.actor._
 import akka.actor.Actor
-import akka.actor.ActorSystem
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.Stash
 import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout
-import akka.util.Timeout
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy._
 
 class Aereo(p: Aeroporto, a: Aeroporto, n: String) {
 
@@ -55,6 +53,10 @@ class Pista(ae: Aeroporto) extends Actor {
     case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")" + " " + sender)
 
   }
+  
+   override val supervisorStrategy = OneForOneStrategy(){
+    case _: NullPointerException => Resume
+  }
 
 }
 
@@ -77,6 +79,10 @@ class GestoreRitardi(a: Aeroporto) extends Actor {
 
     case AtterraInRitardo(a: Aereo) => //println(a.name + " atterra in ritardo" )
       aeroporto.pista ! Atterra(a, true) //UsaPista(a.name + " atterra in ritardo a " + aeroporto.nome)
+  }
+  
+   override val supervisorStrategy = OneForOneStrategy(){
+    case _: NullPointerException => Resume
   }
 }
 
@@ -113,6 +119,10 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
       }
 
   }
+  
+   override val supervisorStrategy = OneForOneStrategy(){
+    case _: NullPointerException => Resume
+  }
 }
 
 class GestoreDecolli(a: Aeroporto) extends Actor {
@@ -143,6 +153,10 @@ class GestoreDecolli(a: Aeroporto) extends Actor {
           ritardi = ritardi + 1
           mittente ! None
       }
+  }
+  
+  override val supervisorStrategy = OneForOneStrategy(){
+    case _: NullPointerException => Resume
   }
 }
 
