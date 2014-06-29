@@ -20,24 +20,35 @@ import scala.util.Random
 class PreparaTimetable (a:Aeroporto, l:List[Aereo]) {
   val aeroporto = a
 
-   var _stringList: List[String] = init(l)
+   var _stringList: List[String] = recInit(l)//init//
  
     def stringList = _stringList
  
     def stringList_=(stringList: List[String]) = _stringList = stringList
     
-    
+     
   
-  def init(l:List[Aereo]) = {
+  def init(/*l:List[Aereo]*/) = {
    // val (arrivi, partenze) = l partition (_.arrivo.equals(aeroporto))
     val generateTimetable = new createTimetable
     var i = -1
     val timetable = 1 to l.size map{ _=> i = i + 1 
         								generateTimetable(a, (l(i).partenza, l(i).arrivo) ) }
     
+    
     timetable.toList
    // stringlist_(List.tabulate(arrivi.size)(i => "A") ++ List.tabulate(partenze.size)(i => "D"))
     
+  }
+  
+  def recInit(rest:List[Aereo]) : List[String] = {
+    val generateTimetable = new createTimetable
+    println(rest.size);
+    rest match {
+       case Nil => Nil
+      case head :: tail => generateTimetable(a, (head.partenza, head.arrivo) ) :: recInit(tail)
+     
+    }
   }
   
   def trasforma() = stringList
