@@ -17,26 +17,30 @@ import scala.util.Random
 }
 
 
-class PreparaTimetable (a:Aeroporto) {
+class PreparaTimetable (a:Aeroporto, l:List[Aereo]) {
   val aeroporto = a
 
-  var _stringList = List[String]()
-  def stringlist = _stringList
-  def stringlist_= (l:List[String]) = _stringList = l
+   var _stringList: List[String] = init(l)
+ 
+    def stringList = _stringList
+ 
+    def stringList_=(stringList: List[String]) = _stringList = stringList
+    
+    
   
-  
-  def transforma(l:List[Aereo]) = {
+  def init(l:List[Aereo]) = {
    // val (arrivi, partenze) = l partition (_.arrivo.equals(aeroporto))
     val generateTimetable = new createTimetable
     var i = -1
     val timetable = 1 to l.size map{ _=> i = i + 1 
         								generateTimetable(a, (l(i).partenza, l(i).arrivo) ) }
     
-    stringlist = timetable.toList
+    timetable.toList
    // stringlist_(List.tabulate(arrivi.size)(i => "A") ++ List.tabulate(partenze.size)(i => "D"))
     
   }
   
+  def trasforma() = stringList
   
   
 }
@@ -45,9 +49,9 @@ trait Normalizza extends PreparaTimetable{
   
   
 
-	abstract override def stringlist = {
+	abstract override def trasforma = {
 			_stringList map{_.toUpperCase()}
-			super.stringlist
+			super.stringList
 			  
 			
 	}
@@ -55,9 +59,9 @@ trait Normalizza extends PreparaTimetable{
 }
 
 trait Randomize extends PreparaTimetable{
-	abstract override def stringlist = {
-	_stringList = Random.shuffle(_stringList)
-	 super.stringlist
+	abstract override def trasforma = {
+	stringList = Random.shuffle(_stringList)
+	 super.stringList
 	
 	}
 }
