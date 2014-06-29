@@ -95,6 +95,7 @@ object Simulazione {
     println("\n")
     
     aeroporti foreach (a => a.start)
+    
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
   
   }else{

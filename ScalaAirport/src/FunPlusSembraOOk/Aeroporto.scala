@@ -94,7 +94,7 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
         case 0 =>
           println(a.name + " in coda atterraggi")
           arrivi += a
-        case x if x > 0 =>
+        case x if x > 0 => 
           ritardiA = ritardiA - 1
           //(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.arrivo.nome)
           aeroporto.GestoreRitardi ! AtterraInRitardo(a)
@@ -245,6 +245,8 @@ class Aeroporto(n: String) {
     }
   }
 
+  
+  
   def start = proxTransito
 
 }
