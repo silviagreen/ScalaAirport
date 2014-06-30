@@ -1,8 +1,8 @@
 package FunPlusSembraOOk
 
 import scala.util.Random
-
 import akka.actor.ActorSystem
+import com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType
 
 
 
@@ -81,9 +81,9 @@ object Simulazione {
     	  		a.timetable = Random.shuffle(List.tabulate((aerei filter(_.arrivo.equals(a))).size )(n => "A") ++ List.tabulate((aerei filter(_.partenza.equals(a))).size)(a => "D"))
     	    )*/
     	
-    	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a, (aerei filter(_.arrivo.equals(a)) ).toList  ++  (aerei filter(_.partenza.equals(a))).toList) with Normalizza with Randomize
-    									tt.trasforma
-    									a.timetable = tt.stringList
+    	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a) /*with Normalizza  */  with StartWithDeparture with Randomize
+    									a.timetable = tt.trasforma(tt.recInit((aerei filter(_.arrivo.equals(a)) ).toList  ++  (aerei filter(_.partenza.equals(a))).toList))
+    									//a.timetable = tt.stringList
     	    
     	}
     
@@ -94,11 +94,14 @@ object Simulazione {
     aeroporti foreach (a => println(a.nome + "\t" + a.timetable))
      println("\n")
     println("\n")
+   
+    
+    aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
     
     aeroporti foreach {a => a.start
       					Thread.sleep(1500)			}
     
-    aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
+    
   
   }
    
