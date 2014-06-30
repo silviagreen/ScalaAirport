@@ -81,7 +81,7 @@ object Simulazione {
     	  		a.timetable = Random.shuffle(List.tabulate((aerei filter(_.arrivo.equals(a))).size )(n => "A") ++ List.tabulate((aerei filter(_.partenza.equals(a))).size)(a => "D"))
     	    )*/
     	
-    	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a)  /* with StartWithDeparture*/ with Normalizza   with Randomize
+    	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a)   with StartWithDeparture with Normalizza   with Randomize
     									a.timetable = tt.trasforma(tt.recInit((aerei filter(_.partenza.equals(a)) ).toList  ++  (aerei filter(_.arrivo.equals(a))).toList))
     									//a.timetable = tt.stringList
     									

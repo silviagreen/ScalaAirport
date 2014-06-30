@@ -1,6 +1,7 @@
 package FunPlusSembraOOk
 
 import scala.util.Random
+import scala.collection.mutable.ArrayBuffer
 
 
   class createTimetable[-Aeroporto, -Aereo] extends Function2[Aeroporto, (Aereo, Aereo), String]/*(T1, T2) => R*/ {
@@ -80,6 +81,15 @@ trait Randomize extends PreparaTimetable{
 }
 	
 	trait StartWithDeparture extends PreparaTimetable{
+	  
+	 def swap [T] (a: Array [T], i: Int, j: Int) : Array[T] =
+    {
+        val t = a(i)
+        a(i) = a(j)
+        a(j) = t
+        a
+    }
+	  
 	  def allArrivals(rest:List[String]) : Boolean = rest match {
 	    case head::Nil => head match {
 	      case "A" => true
@@ -97,13 +107,18 @@ trait Randomize extends PreparaTimetable{
 	 
 	  
 	  override def trasforma(l:List[String]) = {//println("con D all'inizio")
+	    l.toArray
 	    allArrivals(l) match {
 	      case true => super.trasforma(l)
-	      case false if l.size > 1 => (l(0), l(1)) match {
-	        case ("D", x:String) => super.trasforma(l)
-	       
-	         
-	        case ("A", "D") => val l1 = "D" :: "A" :: l.drop(2)
+	      case false if l.size > 1 => l(0) match {
+	        case "D" => super.trasforma(l)
+	        case "A" => val firstP = l.indexOf("D")
+	        			super.trasforma(swap[String](l.toArray, 0, firstP).toList)
+	      }
+	       case _ => super.trasforma(l)   
+	      }
+	      
+	         /* val l1 = "D" :: "A" :: l.drop(2)
 	       // println(l1)
 	         super.trasforma(l1)
 	        case ("A", "A") => val firstP = l.indexOf("D")
@@ -111,14 +126,12 @@ trait Randomize extends PreparaTimetable{
 	        val tail = (l).drop(firstP + 1)
 	        val middle1 = (g1 diff tail)
 	        val middle = middle1.dropRight(1)
-	        val l2 = ("D" :: middle) ::: "D" :: tail
+	        val l2 = ("D" :: middle) ::: "D" :: tail*/
 	        //println(l2)
-	         super.trasforma(l2)
-	        
+	      
 	        			
-	        					}
-	      	case _ => super.trasforma(l)		
-	    }
+	        					
+	      			
 	    
 	   
 	  }
