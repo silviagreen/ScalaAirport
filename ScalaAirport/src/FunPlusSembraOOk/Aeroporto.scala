@@ -1,25 +1,21 @@
 package FunPlusSembraOOk
 
 import scala.collection.mutable.Queue
-import scala.concurrent._
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import akka.actor._
 import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.OneForOneStrategy
 import akka.actor.Stash
+import akka.actor.SupervisorStrategy._
 import akka.pattern.ask
 import akka.pattern.pipe
+import scala.concurrent.Future
+import scala.concurrent.Await
 import akka.util.Timeout
-import akka.actor.OneForOneStrategy
-import akka.actor.SupervisorStrategy._
-import scala.actors.remote.Terminate
 
 class Aereo(p: Aeroporto, a: Aeroporto, n: String) {
 
@@ -57,16 +53,16 @@ class Pista(ae: Aeroporto) extends Actor {
     case Decolla(a: Aereo, ritardo: Boolean) =>
       println(a.name + " decolla da " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
       partiti = partiti + 1
-      if (partiti == partenze && arrivi == arrivati) println("FINE"+ aeroporto.nome)
-    	  //aeroporto.manager ! CodeTerminate
+      if (partiti == partenze && arrivi == arrivati){ println("FINE"+ aeroporto.nome)
+    	  aeroporto.manager ! CodeTerminate}
       Thread.sleep(1000)
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
      
     case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
     											Thread.sleep(1000)
     											arrivati = arrivati + 1
-    											if (partiti == partenze && arrivi == arrivati)  println("FINE " + aeroporto.nome)
-    												//aeroporto.manager ! CodeTerminate
+    											if (partiti == partenze && arrivi == arrivati){  println("FINE " + aeroporto.nome)
+    												aeroporto.manager ! CodeTerminate}
   }
   
    override val supervisorStrategy = OneForOneStrategy(){
@@ -193,11 +189,11 @@ class GestoreDecolli(a: Aeroporto) extends Actor {
  // override def postStop { println("TestActor::postStop decolli") }
 }
 
-class Aeroporto(n: String) {
+class Aeroporto(n: String) extends {
 
   implicit val system = ActorSystem("planes")
   var timetable = List[String]()
-
+  
   private val _nome = n
   def nome = _nome
 
@@ -205,7 +201,7 @@ class Aeroporto(n: String) {
   private val _richiestaDecollo = system.actorOf(Props(new GestoreDecolli(this)), name = "richiestaDecollo")
   private val _richiestaAtterraggio = system.actorOf(Props(new GestoreAtterraggi(this)), name = "richiestaAtterraggio")
   private val _gestoreRitardi = system.actorOf(Props(new GestoreRitardi(this)), name = "gestoreRitardi")
-  private var _manager : ActorRef = _
+  private val _manager : ActorRef = system.actorOf(Props(new Manager(system)), name = "manager")
 
   def pista = _pista
   def richiestaDecollo = _richiestaDecollo
@@ -249,33 +245,24 @@ class Aeroporto(n: String) {
     
   }
 
+
   
-  
-  def start = proxTransito
+  def start = {proxTransito
+    //proxTransito.onSuccess{ case t => system.shutdown}
+  }
 
 }
-/*
-class Manager(aeroporto:Aeroporto, sys : ActorSystem) extends Actor{
-  val system = sys
-  val a = aeroporto
-  var partenze = aeroporto.timetable count (_.equalsIgnoreCase("D"))
-  var arrivi = aeroporto.timetable count (_.equalsIgnoreCase("A"))
-  var codaArriviChiusa = false
-  var codaPartenzeChiusa = false
-  var codeChiuse = 0
-  context.watch(a.richiestaAtterraggio)
-  context.watch(a.richiestaDecollo)
 
+class Manager(system:ActorSystem) extends Actor {
+  var finiti = 0
 
-  
-def receive = {
-   /* case Terminated(x) =>
-      codeChiuse = codeChiuse + 1
-    					codeChiuse match {
-      case 2 => self ! CodeTerminate
-      case x if x < 2 =>
-    }
-      
+  def receive = {
+    case CodeTerminate => system.shutdown
+
+    
+  }
+}
+  /*    
     case Partiti(n:Int) => println( partenze - n)
       partenze - n match {
       case 0 => a.richiestaDecollo ! PoisonPill
@@ -304,11 +291,10 @@ def receive = {
     						
     */
       
-    case CodeTerminate => 
+/*    case CodeTerminate => 
       println(a.nome + " SHUTDOWN")
       system.shutdown
       println(System.nanoTime())
-  }
   
   
 }*/
