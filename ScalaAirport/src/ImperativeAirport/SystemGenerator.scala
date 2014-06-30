@@ -60,16 +60,17 @@ object SystemGenerator {
     
     val startPlanes = new Thread(new Runnable() {
 		def run() {
+		  println(System.nanoTime());
 			for (p <- planeList){
 			  p.start();
-			  Thread.sleep(200);
+			  Thread.sleep(1500);
 			}
 		}
 	});
     
     startPlanes.start();
     startAirports.start();
-    
+    //14.505216481 Seconds
     
   }
   }

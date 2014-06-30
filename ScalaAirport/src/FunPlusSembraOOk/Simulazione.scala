@@ -44,7 +44,7 @@ object Simulazione {
   var j = 0
 
   def main(args: Array[String]): Unit = {
-   	implicit val system = ActorSystem("planes")
+   //	implicit val system = ActorSystem("planes")
    	implicit def strToInt(x: String) = x.toInt
     
     checkParameters(args, args(0), args(1)/*, isAllDigits*/) match {
@@ -84,8 +84,9 @@ object Simulazione {
     	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a) /*with Normalizza  */  with StartWithDeparture with Randomize
     									a.timetable = tt.trasforma(tt.recInit((aerei filter(_.arrivo.equals(a)) ).toList  ++  (aerei filter(_.partenza.equals(a))).toList))
     									//a.timetable = tt.stringList
-    	    
+    									
     	}
+ 
     
     //----------------------------------------------------------------------------
     
@@ -95,13 +96,17 @@ object Simulazione {
      println("\n")
     println("\n")
    
-    
+    println(System.nanoTime())
     aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
+    
+   // aeroporti foreach (a => a.richiestaDecollo ! FineDecolli)
     
     aeroporti foreach {a => a.start
       					Thread.sleep(1500)			}
     
     
+    
+    //11.011812466 Seconds
   
   }
    

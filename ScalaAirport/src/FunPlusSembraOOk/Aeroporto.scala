@@ -19,6 +19,7 @@ import akka.pattern.pipe
 import akka.util.Timeout
 import akka.actor.OneForOneStrategy
 import akka.actor.SupervisorStrategy._
+import scala.actors.remote.Terminate
 
 class Aereo(p: Aeroporto, a: Aeroporto, n: String) {
 
@@ -41,23 +42,38 @@ case object FaiDecollare extends Messaggi
 case object FaiAtterrare extends Messaggi
 case class Decolla(a: Aereo, ritardo: Boolean) extends Messaggi
 case class Atterra(a: Aereo, ritardo: Boolean) extends Messaggi
+case class Partiti(n:Int)
+case class Arrivati(n:Int)
+case class CodeTerminate
 
 class Pista(ae: Aeroporto) extends Actor {
   private val aeroporto = ae
+  private val partenze = ae.timetable count(_.equalsIgnoreCase("D"))
+  private val arrivi = ae.timetable count(_.equalsIgnoreCase("A"))
+  private var partiti = 0
+  private var arrivati = 0
   def receive = {
     //case UsaPista(message : String) => println(message)
     case Decolla(a: Aereo, ritardo: Boolean) =>
       println(a.name + " decolla da " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
+      partiti = partiti + 1
+      if (partiti == partenze && arrivi == arrivati) 
+    	  aeroporto.manager ! CodeTerminate
       Thread.sleep(1000)
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
      
     case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
-
+    											Thread.sleep(1000)
+    											arrivati = arrivati + 1
+    											if (partiti == partenze && arrivi == arrivati) 
+    												aeroporto.manager ! CodeTerminate
   }
   
    override val supervisorStrategy = OneForOneStrategy(){
     case _: NullPointerException => Resume
   }
+   
+  // override def postStop { println("TestActor::postStop pista") }
 
 }
 
@@ -85,6 +101,8 @@ class GestoreRitardi(a: Aeroporto) extends Actor {
    override val supervisorStrategy = OneForOneStrategy(){
     case _: NullPointerException => Resume
   }
+   
+  // override def postStop { println("TestActor::postStop ritardi") }
 }
 
 class GestoreAtterraggi(a: Aeroporto) extends Actor {
@@ -92,6 +110,8 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
   private val aeroporto = a
   private var arrivi = Queue[Aereo]()
   private var ritardiA = 0
+ // private var fineDecolli = false
+  //private var decolli = 0
 
   def receive = {
 
@@ -105,6 +125,7 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
           ritardiA = ritardiA - 1
           //(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.arrivo.nome)
           aeroporto.GestoreRitardi ! AtterraInRitardo(a)
+         // decolli = decolli + 1
       }
 
     case FaiAtterrare =>
@@ -112,24 +133,34 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
       Try(arrivi.dequeue) match {
         case Success(aereo) => //println(aereo.name + "atterra")
           mittente ! Some(aereo)
+      //    decolli = decolli + 1
         case Failure(f) =>
           ritardiA = ritardiA + 1
           //println("ritardo in " + aeroporto.nome +" " + ritardiA)
           mittente ! None
 
       }
+      
+   /* case FineDecolli => fineDecolli = true
+    case FineRichiesteDecolli(x) => x - decolli match {
+      case 0 => self ! PoisonPill
+      case x if x > 0 => self ! FineRichiesteDecolli(x)
+    }*/
 
   }
   
    override val supervisorStrategy = OneForOneStrategy(){
     case _: NullPointerException => Resume
   }
+   
+  // override def postStop { println("TestActor::postStop atterraggi") }
 }
 
 class GestoreDecolli(a: Aeroporto) extends Actor {
   private val aeroporto = a
   private var partenze = Queue[Aereo]()
   private var ritardi = 0
+
 
   def receive = {
     case ChiediDecollo(a: Aereo) => println(a.name + " chiede decollo")
@@ -159,6 +190,8 @@ class GestoreDecolli(a: Aeroporto) extends Actor {
   override val supervisorStrategy = OneForOneStrategy(){
     case _: NullPointerException => Resume
   }
+  
+ // override def postStop { println("TestActor::postStop decolli") }
 }
 
 class Aeroporto(n: String) {
@@ -169,15 +202,17 @@ class Aeroporto(n: String) {
   private val _nome = n
   def nome = _nome
 
-  private val _pista = system.actorOf(Props(new Pista(this)), name = "pista")
+  private var _pista : ActorRef = _
   private val _richiestaDecollo = system.actorOf(Props(new GestoreDecolli(this)), name = "richiestaDecollo")
   private val _richiestaAtterraggio = system.actorOf(Props(new GestoreAtterraggi(this)), name = "richiestaAtterraggio")
   private val _gestoreRitardi = system.actorOf(Props(new GestoreRitardi(this)), name = "gestoreRitardi")
+  private var _manager : ActorRef = _
 
   def pista = _pista
   def richiestaDecollo = _richiestaDecollo
   def richiestaAtterraggio = _richiestaAtterraggio
   def GestoreRitardi = _gestoreRitardi
+  def manager = _manager
 
   def timetable_(l: List[String]) = timetable = l
   /*
@@ -221,7 +256,10 @@ class Aeroporto(n: String) {
 	}*/
 
   def proxTransito: Future[Unit] = Future {
+    _manager = system.actorOf(Props(new Manager(this, system)), name = "manager")
+    _pista = system.actorOf(Props(new Pista(this)), name = "pista")
     implicit val timeout = Timeout(10 seconds)
+   
     for (t <- timetable) yield {
       t match {
         case "D" =>
@@ -256,8 +294,12 @@ class Aeroporto(n: String) {
           }
 
       }
+      
+    //  richiestaDecollo ! FineRichiesteDecolli(timetable count(_.equalsIgnoreCase("D")))
 
     }
+    
+    
   }
 
   
@@ -266,4 +308,61 @@ class Aeroporto(n: String) {
 
 }
 
+class Manager(aeroporto:Aeroporto, sys : ActorSystem) extends Actor{
+  val system = sys
+  val a = aeroporto
+  var partenze = aeroporto.timetable count (_.equalsIgnoreCase("D"))
+  var arrivi = aeroporto.timetable count (_.equalsIgnoreCase("A"))
+  var codaArriviChiusa = false
+  var codaPartenzeChiusa = false
+  var codeChiuse = 0
+  context.watch(a.richiestaAtterraggio)
+  context.watch(a.richiestaDecollo)
+
+
+  
+def receive = {
+   /* case Terminated(x) =>
+      codeChiuse = codeChiuse + 1
+    					codeChiuse match {
+      case 2 => self ! CodeTerminate
+      case x if x < 2 =>
+    }
+      
+    case Partiti(n:Int) => println( partenze - n)
+      partenze - n match {
+      case 0 => a.richiestaDecollo ! PoisonPill
+    	/*	  codaPartenzeChiusa = true
+    		  codaArriviChiusa match {
+        case true => self ! CodeTerminate
+        case false =>
+      }*/
+      case x if x != 0 => 
+    }
+    
+    case Arrivati(n:Int) => println( arrivi - n)
+      arrivi - n match {
+      case 0 => a.richiestaAtterraggio ! PoisonPill
+    	/*	  	codaArriviChiusa = true
+    		  	codaPartenzeChiusa match {
+        case true => self ! CodeTerminate
+        case false =>
+      }*/
+      case x if x != 0 => 
+    }
+    
+    case CodeTerminate => system.shutdown//a.GestoreRitardi ! PoisonPill
+    						//a.pista ! PoisonPill
+    						
+    						
+    */
+      
+    case CodeTerminate => 
+      println(a.nome + " SHUTDOWN")
+      system.shutdown
+      println(System.nanoTime())
+  }
+  
+  
+}
  

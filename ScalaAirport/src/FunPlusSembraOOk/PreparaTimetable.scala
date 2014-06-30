@@ -51,7 +51,7 @@ class PreparaTimetable (a:Aeroporto/*, l:List[Aereo]*/) {
   }
   
   def trasforma(l:List[String]) = {
-    println("in super")
+    //println("in super")
     l}
   
   
@@ -73,7 +73,7 @@ trait Normalizza extends PreparaTimetable{
 trait Randomize extends PreparaTimetable{
 	override def trasforma(l:List[String]) = {
 	val lr = Random.shuffle(l)
-	println("randomizzo");
+	//println("randomizzo");
 	 super.trasforma(lr)
 	
 	}
@@ -96,7 +96,7 @@ trait Randomize extends PreparaTimetable{
 	 
 	 
 	  
-	  override def trasforma(l:List[String]) = {println("con D all'inizio")
+	  override def trasforma(l:List[String]) = {//println("con D all'inizio")
 	    allArrivals(l) match {
 	      case true => super.trasforma(l)
 	      case false if l.size > 1 => (l(0), l(1)) match {
@@ -104,7 +104,7 @@ trait Randomize extends PreparaTimetable{
 	       
 	         
 	        case ("A", "D") => val l1 = "D" :: "A" :: l.drop(2)
-	        println(l1)
+	       // println(l1)
 	         super.trasforma(l1)
 	        case ("A", "A") => val firstP = l.indexOf("D")
 	        val g1 = l.drop(1) 
@@ -112,7 +112,7 @@ trait Randomize extends PreparaTimetable{
 	        val middle1 = (g1 diff tail)
 	        val middle = middle1.dropRight(1)
 	        val l2 = ("D" :: middle) ::: "D" :: tail
-	        println(l2)
+	        //println(l2)
 	         super.trasforma(l2)
 	        
 	        			

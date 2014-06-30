@@ -52,7 +52,7 @@ class ControlTower (a:Airport) extends Thread{
 		  a.track.synchronized{
 		    p.takeOff();
 		  }
-		  Thread.sleep(200);
+		  Thread.sleep(1000);
 		  p.arrival.addArrival(p);
 	  }
 	}
@@ -111,6 +111,8 @@ class ControlTower (a:Airport) extends Thread{
 	      handleDeparture();
 	    k = k + 1;
 	  }
+	  
+	  println(System.nanoTime())
 	}
 	
 	

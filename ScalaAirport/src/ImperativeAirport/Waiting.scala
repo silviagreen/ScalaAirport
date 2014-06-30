@@ -31,8 +31,10 @@ class Waiting (wq:Queue[Airplane], landing:Boolean) extends Thread{
 	    plane.arrival.track.synchronized{
 	      plane.takeOff();
 	    }
-	    Thread.sleep(200);
+	    Thread.sleep(1000);
 	    plane.arrival.addArrival(plane);
 	  }
+	  
+	   println(System.nanoTime())
 	}
 }
