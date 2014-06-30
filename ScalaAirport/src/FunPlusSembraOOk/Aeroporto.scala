@@ -47,11 +47,11 @@ class Pista(ae: Aeroporto) extends Actor {
   def receive = {
     //case UsaPista(message : String) => println(message)
     case Decolla(a: Aereo, ritardo: Boolean) =>
-      println(a.name + " decolla da " + aeroporto.nome + " (in ritardo? " + ritardo + ")" + " " + sender)
+      println(a.name + " decolla da " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
       Thread.sleep(1000)
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
      
-    case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")" + " " + sender)
+    case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
 
   }
   

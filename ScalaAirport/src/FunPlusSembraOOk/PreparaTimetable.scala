@@ -115,9 +115,9 @@ trait Randomize extends PreparaTimetable{
 	        println(l2)
 	         super.trasforma(l2)
 	        
-	        case _ => super.trasforma(l)			
+	        			
 	        					}
-	      			
+	      	case _ => super.trasforma(l)		
 	    }
 	    
 	   
