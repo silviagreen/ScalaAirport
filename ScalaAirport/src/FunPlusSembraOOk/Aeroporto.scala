@@ -57,16 +57,16 @@ class Pista(ae: Aeroporto) extends Actor {
     case Decolla(a: Aereo, ritardo: Boolean) =>
       println(a.name + " decolla da " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
       partiti = partiti + 1
-      if (partiti == partenze && arrivi == arrivati) 
-    	  aeroporto.manager ! CodeTerminate
+      if (partiti == partenze && arrivi == arrivati) println("FINE"+ aeroporto.nome)
+    	  //aeroporto.manager ! CodeTerminate
       Thread.sleep(1000)
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
      
     case Atterra(a: Aereo, ritardo: Boolean) => println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")"/* + " " + sender*/)
     											Thread.sleep(1000)
     											arrivati = arrivati + 1
-    											if (partiti == partenze && arrivi == arrivati) 
-    												aeroporto.manager ! CodeTerminate
+    											if (partiti == partenze && arrivi == arrivati)  println("FINE " + aeroporto.nome)
+    												//aeroporto.manager ! CodeTerminate
   }
   
    override val supervisorStrategy = OneForOneStrategy(){
@@ -91,10 +91,10 @@ class Pista(ae: Aeroporto) extends Actor {
 class GestoreRitardi(a: Aeroporto) extends Actor {
   private val aeroporto = a
   def receive = {
-    case DecollaInRitardo(a: Aereo) => //println(a.name + " decolla in ritardo" )
+    case DecollaInRitardo(a: Aereo) => println(a.name + " decolla in ritardo" )
       aeroporto.pista ! Decolla(a, true) //UsaPista(a.name + " decolla in ritardo da " + aeroporto.nome)
 
-    case AtterraInRitardo(a: Aereo) => //println(a.name + " atterra in ritardo" )
+    case AtterraInRitardo(a: Aereo) => println(a.name + " atterra in ritardo" )
       aeroporto.pista ! Atterra(a, true) //UsaPista(a.name + " atterra in ritardo a " + aeroporto.nome)
   }
   
@@ -121,7 +121,7 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
         case 0 =>
           println(a.name + " in coda atterraggi")
           arrivi += a
-        case x if x > 0 => 
+        case x if x > 0 =>   println(a.name + " riparte subito, mancano " + ritardiA + " ritardi")
           ritardiA = ritardiA - 1
           //(aeroporto.pista) ! UsaPista(a.name + " atterra a " + a.arrivo.nome)
           aeroporto.GestoreRitardi ! AtterraInRitardo(a)
@@ -131,12 +131,11 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
     case FaiAtterrare =>
       val mittente = sender
       Try(arrivi.dequeue) match {
-        case Success(aereo) => //println(aereo.name + "atterra")
-          mittente ! Some(aereo)
-      //    decolli = decolli + 1
+        case Success(aereo) => println("ok atterraggio di  " + aereo.name)
+     mittente ! Some(aereo)
         case Failure(f) =>
           ritardiA = ritardiA + 1
-          //println("ritardo in " + aeroporto.nome +" " + ritardiA)
+          println("nessun aereo da far decollare, ritardi " + ritardiA)
           mittente ! None
 
       }
@@ -166,7 +165,7 @@ class GestoreDecolli(a: Aeroporto) extends Actor {
     case ChiediDecollo(a: Aereo) => println(a.name + " chiede decollo")
       val mittente = sender
       ritardi match {
-        case x if x > 0 =>
+        case x if x > 0 =>  println(a.name + " riparte subito, mancano " + ritardi + " ritardi")
           ritardi = ritardi - 1
           //aeroporto.pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
           aeroporto.GestoreRitardi ! DecollaInRitardo(a)
@@ -178,10 +177,10 @@ class GestoreDecolli(a: Aeroporto) extends Actor {
       val mittente = sender
 
       Try(partenze.dequeue) match {
-        case Success(aereo) =>
+        case Success(aereo) =>   println("ok decollo di  " + aereo.name)
           mittente ! Some(aereo)
         case Failure(f) =>
-          println("nessun aereo da far decollare")
+          println("nessun aereo da far decollare, ritardi " + ritardi)
           ritardi = ritardi + 1
           mittente ! None
       }
@@ -215,50 +214,11 @@ class Aeroporto(n: String) {
   def manager = _manager
 
   def timetable_(l: List[String]) = timetable = l
-  /*
-	def proxTransito : Future[Unit] = Future {
-	  implicit val timeout = Timeout(10 seconds)
-	  timetable foreach { t =>
-	    t match {
-	    case "D" => 
-	    			
-	    			  val future = richiestaDecollo ? FaiDecollare
-	    			  val result = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
-	    			result match {
-	    				case Some(a) => pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
-	    				//println("dopo pista")
-	    				//println("chiedo di accodare " + a.name)
-	    								a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
-	    				case None => 
-	    			}
-	    			
-	    			/*val futureAereo = ask(richiestaDecollo, FaiDecollare).mapTo[Option[Aereo]]
-	    			futureAereo.onSuccess{
-	    			  case result => result match {
-	    			    case Some(a) => pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
-	    				println("chiedo di accodare " + a.name)
-	    								a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
-	    				case None => 
-	    			  }
-	    			}*/
-	    			
-	    			
-	    case "A" => val future = richiestaAtterraggio ? FaiAtterrare
-	    			val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
-	    			results match {
-	    				case Some(a) => pista ! UsaPista(a.name + " atterra da " + a.arrivo.nome)
-	    				case None => 
-	    			}
-	    			
-	  }
-	    
-	  }
-	}*/
+
 
   def proxTransito: Future[Unit] = Future {
-    _manager = system.actorOf(Props(new Manager(this, system)), name = "manager")
     _pista = system.actorOf(Props(new Pista(this)), name = "pista")
-    implicit val timeout = Timeout(10 seconds)
+    implicit val timeout = Timeout(100 seconds)
    
     for (t <- timetable) yield {
       t match {
@@ -269,21 +229,9 @@ class Aeroporto(n: String) {
           result match {
             case Some(a) =>
               pista ! Decolla(a, false) //UsaPista(a.name + " decolla da " + a.partenza.nome)
-              //println("dopo pista")
-              //println("chiedo di accodare " + a.name)
-             // a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
             case None =>
           }
 
-        /*val futureAereo = ask(richiestaDecollo, FaiDecollare).mapTo[Option[Aereo]]
-	    			futureAereo.onSuccess{
-	    			  case result => result match {
-	    			    case Some(a) => pista ! UsaPista(a.name + " decolla da " + a.partenza.nome)
-	    				println("chiedo di accodare " + a.name)
-	    								a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
-	    				case None => 
-	    			  }
-	    			}*/
 
         case "A" =>
           val future = richiestaAtterraggio ? FaiAtterrare
@@ -295,7 +243,6 @@ class Aeroporto(n: String) {
 
       }
       
-    //  richiestaDecollo ! FineRichiesteDecolli(timetable count(_.equalsIgnoreCase("D")))
 
     }
     
@@ -307,7 +254,7 @@ class Aeroporto(n: String) {
   def start = proxTransito
 
 }
-
+/*
 class Manager(aeroporto:Aeroporto, sys : ActorSystem) extends Actor{
   val system = sys
   val a = aeroporto
@@ -364,5 +311,5 @@ def receive = {
   }
   
   
-}
+}*/
  
