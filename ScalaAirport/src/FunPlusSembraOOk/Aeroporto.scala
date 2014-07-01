@@ -243,7 +243,7 @@ class Aeroporto(n: String) extends {
             case Some(a) => pista ! Atterra(a, false) //UsaPista(a.name + " atterra da " + a.arrivo.nome)
             case None =>
           }
-          //Thread.sleep(1200)//attendo che il volo arrivi
+          Thread.sleep(1200)//attendo che il volo arrivi
 
       }
 

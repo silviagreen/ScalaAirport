@@ -1,4 +1,4 @@
-package Fun2Meglio
+package NOFun2Meglio
 
 
 import scala.util.Random

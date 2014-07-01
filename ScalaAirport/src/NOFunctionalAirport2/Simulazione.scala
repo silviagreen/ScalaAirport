@@ -1,4 +1,4 @@
-package FunctionalAirport2
+package NOFunctionalAirport2
 
 import scala.util.Random
 

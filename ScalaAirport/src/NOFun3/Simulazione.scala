@@ -1,4 +1,4 @@
-package Fun3
+package NOFun3
 
 import scala.util.Random
 

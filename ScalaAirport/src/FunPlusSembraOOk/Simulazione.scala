@@ -70,7 +70,7 @@ object Simulazione extends App{
     }
 
     aeroporti map { a: Aeroporto =>
-      val tt = new PreparaTimetable(a) with StartWithDeparture with Normalizza with Randomize
+      val tt = new PreparaTimetable(a) //with StartWithDeparture with Normalizza with Randomize
       a.timetable = tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList))
     }
 
@@ -87,7 +87,7 @@ object Simulazione extends App{
   
     for{f <- decolli
         g <- attivazione}
-      yield System.out.println("Number of active threads from the given thread: " + Thread.activeCount()); // println("Creazione Completata")
+      yield println("Attivazione completata")//System.out.println("Number of active threads from the given thread: " + Thread.activeCount()); // println("Creazione Completata")
     
 
 

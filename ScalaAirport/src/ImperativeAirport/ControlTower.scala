@@ -107,14 +107,18 @@ class ControlTower (a:Airport) extends Thread{
 	    setNextTransit(k - 1);
 	    if(nextTransit.equals("A")){
 	      handleArrival();
-	     Thread.sleep(1200);}
+	     
+	     }
 	    else{
 	      handleDeparture();
-	       Thread.sleep(1200);}
+	      
+	       }
 	    k = k + 1;
+	    Thread.sleep(1200);
 	  }
 	  
-	  println(System.nanoTime())
+	 // System.out.println("Number of active threads from the given thread: " + Thread.activeCount());
+	  //println(System.nanoTime())
 	}
 	
 	

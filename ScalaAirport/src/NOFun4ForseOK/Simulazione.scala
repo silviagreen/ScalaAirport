@@ -1,4 +1,4 @@
-package Fun4ForseOK
+package NOFun4ForseOK
 
 import scala.util.Random
 
