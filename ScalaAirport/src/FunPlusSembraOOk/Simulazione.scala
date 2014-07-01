@@ -1,10 +1,10 @@
 package FunPlusSembraOOk
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Random
 
-object Simulazione {
+object Simulazione extends App{
 
 
   /*class IntToStringConverter extends Int => String {
@@ -35,12 +35,12 @@ object Simulazione {
 
   def fallisci = println("La simulazione non può partire")
   
-  def decolloAerei(aerei : List[Aereo]) = /*Future*/ {
+  def decolloAerei(aerei : List[Aereo]) = Future {
     aerei foreach {a => a.partenza.richiestaDecollo ! ChiediDecollo(a) 
       					Thread.sleep(1500)}
   }
   
-  def attivazioneAeroporti (aeroporti : List[Aeroporto]) = /*Future*/ {
+  def attivazioneAeroporti (aeroporti : List[Aeroporto]) = Future {
         aeroporti foreach ( a => a.start)
   }
 
@@ -48,6 +48,7 @@ object Simulazione {
 
     implicit def strToInt(x: String) = x.toInt
     implicit def IndexSeqToList[T](x: IndexedSeq[T]) = x.toList
+    
     val nAeroporti: Int = n1 //.toInt
     val nAerei: Int = n2 //.toInt
     val aeroporti = 1 to nAeroporti map { _ =>
@@ -80,12 +81,11 @@ object Simulazione {
     
     val decolli = decolloAerei(aerei)
     val attivazione = attivazioneAeroporti(aeroporti)
-    println(System.nanoTime())
-    decolli
-    attivazione
-    /*for{f <- decolli
+
+  
+    for{f <- decolli
         g <- attivazione}
-      yield  println("Creazione Completata")*/
+      yield System.out.println("Number of active threads from the given thread: " + Thread.activeCount()); // println("Creazione Completata")
     
 
 
@@ -94,14 +94,14 @@ object Simulazione {
 
   }
 
-  def main(args: Array[String]): Unit = {
+//  def main(args: Array[String]): Unit = {
 
     checkParameters(args, args(0), args(1) /*, isAllDigits*/ ) match {
       case false => fallisci
       case true => creaSistema(args(0), args(1))
 
     }
-  }
+  //}
 }
 
   /*aeroporti foreach ( a =>

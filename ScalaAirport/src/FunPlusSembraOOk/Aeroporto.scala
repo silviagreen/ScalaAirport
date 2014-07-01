@@ -55,12 +55,12 @@ class Pista(ae: Aeroporto) extends Actor {
         println("FINE " + aeroporto.nome)
         aeroporto.manager ! CodeTerminate
       }
-      Thread.sleep(1000)//occupa la pista per 1 secondo
+      //Thread.sleep(1000)//occupa la pista per 1 secondo
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
 
     case Atterra(a: Aereo, ritardo: Boolean) =>
       println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")" /* + " " + sender*/ )
-      Thread.sleep(1000) //occupa la pista per 1 secondo
+     // Thread.sleep(1000) //occupa la pista per 1 secondo
       arrivati = arrivati + 1
       if (partiti == partenze && arrivi == arrivati) {
         println("FINE " + aeroporto.nome)
@@ -145,12 +145,6 @@ class GestoreAtterraggi(a: Aeroporto) extends Actor {
 
       }
 
-    /* case FineDecolli => fineDecolli = true
-    case FineRichiesteDecolli(x) => x - decolli match {
-      case 0 => self ! PoisonPill
-      case x if x > 0 => self ! FineRichiesteDecolli(x)
-    }*/
-
   }
 
   override val supervisorStrategy = OneForOneStrategy() {
@@ -227,8 +221,10 @@ class Aeroporto(n: String) extends {
   def proxTransito: Future[Unit] = Future {
     _pista = system.actorOf(Props(new Pista(this)), name = "pista")
     implicit val timeout = Timeout(100 seconds)
-
-    for (t <- timetable) yield {
+    timetable.size match {
+      case 0 => manager ! CodeTerminate
+      case x if x > 0 =>
+        for (t <- timetable) yield {
       t match {
         case "D" =>
 
@@ -239,7 +235,7 @@ class Aeroporto(n: String) extends {
               pista ! Decolla(a, false) //UsaPista(a.name + " decolla da " + a.partenza.nome)
             case None =>
           }
-           Thread.sleep(1200)//attendo che il volo arrivi
+          // Thread.sleep(1200)//attendo che il volo arrivi
         case "A" =>
           val future = richiestaAtterraggio ? FaiAtterrare
           val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
@@ -247,11 +243,13 @@ class Aeroporto(n: String) extends {
             case Some(a) => pista ! Atterra(a, false) //UsaPista(a.name + " atterra da " + a.arrivo.nome)
             case None =>
           }
-          Thread.sleep(1200)//attendo che il volo arrivi
+          //Thread.sleep(1200)//attendo che il volo arrivi
 
       }
 
     }
+    }
+    
 
   }
 
