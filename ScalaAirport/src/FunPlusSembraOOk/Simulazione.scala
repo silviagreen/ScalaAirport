@@ -1,114 +1,108 @@
 package FunPlusSembraOOk
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
-import akka.actor.ActorSystem
-import com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType
-
-
 
 object Simulazione {
-  
-  /**
-   * def fraction: PartialFunction[Int, Int] =
-    { case d: Int if d != 0 ⇒ 42 / d }
-   */
-  
-/*class IntToStringConverter extends Int => String {
+
+
+  /*class IntToStringConverter extends Int => String {
   def apply(i: Int): String = i.toString
 }*/
   
+  val checkIfDigit = (x:String) => x forall Character.isDigit
 
-  
-  def isAllDigit : PartialFunction[String, Boolean] = {
-    case x:String => x forall Character.isDigit 
+  def isAllDigit: PartialFunction[String, Boolean] = {
+    case x: String => checkIfDigit(x)
   }
   
- 
-  
-  //def isAllDigits(x: String) = x forall Character.isDigit
-    
-  def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String/*, correctType: String=>Boolean*/): Boolean = {
-    if(args.size < 2){
+
+  def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String /*, correctType: String=>Boolean*/ ): Boolean = {
+    if (args.size < 2) {
       println("Errore: Sono richiesti due parametri numerici")
       false
-    }
-    else{
-      if(!isAllDigit(nAeroporti) || !isAllDigit(nAerei)){
+    } else {
+      if (!isAllDigit(nAeroporti) || !isAllDigit(nAerei)) {
         println("Errore: inseriti parametri non numerici")
         false
-      }else true
+      } else true
     }
   }
-  
+
   var i = 0
   var j = 0
 
-  def main(args: Array[String]): Unit = {
-   //	implicit val system = ActorSystem("planes")
-   	implicit def strToInt(x: String) = x.toInt
-    
-    checkParameters(args, args(0), args(1)/*, isAllDigits*/) match {
-   	  case false => println("La simulazione non può partire")
-   	  case true => val nAeroporti:Int = args(0)//.toInt
-    	val nAerei:Int = args(1)//.toInt
-    	val aeroporti =  1 to nAeroporti map{ _=> i = i + 1 
-    	  										//	system.actorOf(Props(new Aeroporto("Aeroporto" + (i))), name = "aereoporto" + i)
-      											 new Aeroporto("Aeroporto" + (i))
-    	  
-    	}
-    
-   //----------------------MODO 1-------------------------------------------------------
-    
-   /* val index = List.range(0, nAeroporti, 1)
-    println("NOME\t PARTENZA\t ARRIVO")
-    val aerei = 1 to nAerei map{
-      _ => val idx = Random.shuffle(index)
-    	   j = j + 1
-    	   aeroporti(idx(0)).timetable += "D"
-    	   aeroporti(idx(1)).timetable += "A"
-    	   println("aereo" + j + "\t" + aeroporti(idx(0)).nome + "\t" + aeroporti(idx(1)).nome)
-    	   new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), "aereo" + j)  
-    }*/
-    	val index = List.range(0, nAeroporti, 1)
-    	val aerei =  1 to nAerei map{
-    	  _=> val idx = Random.shuffle(index)
-    	   j = j + 1
-    	   println("aereo" + j + "\t" + aeroporti(idx(0)).nome + "\t" + aeroporti(idx(1)).nome)
-    	   new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), "aereo" + j)  
-    	}
-    	
-    	/*aeroporti foreach ( a =>
-    	  		a.timetable = Random.shuffle(List.tabulate((aerei filter(_.arrivo.equals(a))).size )(n => "A") ++ List.tabulate((aerei filter(_.partenza.equals(a))).size)(a => "D"))
-    	    )*/
-    	
-    	aeroporti map{	a:Aeroporto => val tt = new PreparaTimetable(a)   with StartWithDeparture with Normalizza   with Randomize
-    									a.timetable = tt.trasforma(tt.recInit((aerei filter(_.partenza.equals(a)) ).toList  ++  (aerei filter(_.arrivo.equals(a))).toList))
-    									//a.timetable = tt.stringList
-    									
-    	}
- 
-    
-    //----------------------------------------------------------------------------
-    
-    println("\n")
+  def fallisci = println("La simulazione non può partire")
+  
+  def decolloAerei(aerei : List[Aereo]) = /*Future*/ {
+    aerei foreach {a => a.partenza.richiestaDecollo ! ChiediDecollo(a) 
+      					Thread.sleep(1500)}
+  }
+  
+  def attivazioneAeroporti (aeroporti : List[Aeroporto]) = /*Future*/ {
+        aeroporti foreach ( a => a.start)
+  }
+
+  def creaSistema(n1: String, n2: String) = {
+
+    implicit def strToInt(x: String) = x.toInt
+    implicit def IndexSeqToList[T](x: IndexedSeq[T]) = x.toList
+    val nAeroporti: Int = n1 //.toInt
+    val nAerei: Int = n2 //.toInt
+    val aeroporti = 1 to nAeroporti map { _ =>
+      i = i + 1
+      new Aeroporto("Aeroporto" + (i))
+
+    }
+
+    println("NOME"+ "\t" + "PARTENZA" + "\t" + "ARRIVO")
+    val index = List.range(0, nAeroporti, 1)
+    val aerei = 1 to nAerei map {
+      _ =>
+        val idx = Random.shuffle(index)
+        j = j + 1
+        println("aereo" + j + "\t" + aeroporti(idx(0)).nome + "\t" + aeroporti(idx(1)).nome)
+        new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), "aereo" + j)
+    }
+
+    aeroporti map { a: Aeroporto =>
+      val tt = new PreparaTimetable(a) with StartWithDeparture with Normalizza with Randomize
+      a.timetable = tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList))
+    }
+
+
     println("\n")
     aeroporti foreach (a => println(a.nome + "\t" + a.timetable))
-     println("\n")
     println("\n")
-   
+
     println(System.nanoTime())
-    aerei foreach (a => a.partenza.richiestaDecollo ! ChiediDecollo(a)/*a.partenza.richiestaAtterraggio(a)*/)
     
+    val decolli = decolloAerei(aerei)
+    val attivazione = attivazioneAeroporti(aeroporti)
+    decolli
+    attivazione
+    /*for{f <- decolli
+        g <- attivazione}
+      yield  println("Creazione Completata")*/
     
-    aeroporti foreach {a => a.start
-      					Thread.sleep(1500)			}
-    
-    
-    
+
+
+
     //11.011812466 Seconds
-  
+
   }
-   
-  
+
+  def main(args: Array[String]): Unit = {
+
+    checkParameters(args, args(0), args(1) /*, isAllDigits*/ ) match {
+      case false => fallisci
+      case true => creaSistema(args(0), args(1))
+
+    }
   }
 }
+
+  /*aeroporti foreach ( a =>
+    	  		a.timetable = Random.shuffle(List.tabulate((aerei filter(_.arrivo.equals(a))).size )(n => "A") ++ List.tabulate((aerei filter(_.partenza.equals(a))).size)(a => "D"))
+    	    )*/
