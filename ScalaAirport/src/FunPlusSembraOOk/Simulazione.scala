@@ -38,12 +38,12 @@ object Simulazione extends App{
   def fallisci = println("La simulazione non può partire")
   
   def decolloAerei(aerei : List[Aereo]) = Future {
-    aerei foreach {a => a.partenza.richiestaDecollo ! ChiediDecollo(a) 
+    aerei.par foreach {a => a.partenza.richiestaDecollo ! ChiediDecollo(a) 
       					Thread.sleep(1500)}
   }
   
-  def attivazioneAeroporti (aeroporti : List[Aeroporto]) = Future {
-        aeroporti foreach ( a => a.start)
+  def attivazioneAeroporti (aeroporti : List[Aeroporto]) = {
+        aeroporti.par foreach ( a => a.start)
   }
 
   def creaSistema(n1: String, n2: String) = {
@@ -81,13 +81,11 @@ object Simulazione extends App{
 
     println(System.nanoTime())
     
-    val decolli = decolloAerei(aerei)
-    val attivazione = attivazioneAeroporti(aeroporti)
+    decolloAerei(aerei)
+    attivazioneAeroporti(aeroporti)
 
   
-    for{f <- decolli
-        g <- attivazione}
-      yield println("Attivazione completata")//System.out.println("Number of active threads from the given thread: " + Thread.activeCount()); // println("Creazione Completata")
+    
     
 
 
@@ -102,7 +100,7 @@ object Simulazione extends App{
       case false => fallisci
       case true => creaSistema(args(0), args(1))
 
-    }
+    }     // a.timetable.reverse
   //}
 }
 

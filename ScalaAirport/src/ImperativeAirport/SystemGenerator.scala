@@ -58,7 +58,7 @@ object SystemGenerator {
     	}
     });
     
-    val startPlanes = new Thread(new Runnable() {
+ /*   val startPlanes = new Thread(new Runnable() {
 		def run() {
 		  println(System.nanoTime());
 			for (p <- planeList){
@@ -68,7 +68,21 @@ object SystemGenerator {
 		}
 	});
     
-    startPlanes.start();
+    startPlanes.start();*/
+    
+    //partenze mai in ritardo
+    def compfn2(e1: String, e2: String) = {(e1.toLowerCase < e2.toLowerCase)}
+    
+    for(a <- airportList){   
+     // a.timetable = a.timetable.sortWith(compfn2(_, _)).reverse//sortWith(compfn2)
+      println(a.name + "\t" + a.timetable)
+    }
+    
+    for(p <- planeList){
+      p.start();
+      Thread.sleep(1500);
+    }
+      
     startAirports.start();
     //14.505216481 Seconds
     
