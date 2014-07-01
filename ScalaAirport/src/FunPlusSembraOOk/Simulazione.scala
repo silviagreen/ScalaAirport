@@ -80,6 +80,7 @@ object Simulazione {
     
     val decolli = decolloAerei(aerei)
     val attivazione = attivazioneAeroporti(aeroporti)
+    println(System.nanoTime())
     decolli
     attivazione
     /*for{f <- decolli

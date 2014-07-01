@@ -105,10 +105,12 @@ class ControlTower (a:Airport) extends Thread{
 	  var k = 1;
 	  while(k <= timetable.size){
 	    setNextTransit(k - 1);
-	    if(nextTransit.equals("A"))
+	    if(nextTransit.equals("A")){
 	      handleArrival();
-	    else
+	     Thread.sleep(1200);}
+	    else{
 	      handleDeparture();
+	       Thread.sleep(1200);}
 	    k = k + 1;
 	  }
 	  

@@ -55,12 +55,12 @@ class Pista(ae: Aeroporto) extends Actor {
         println("FINE " + aeroporto.nome)
         aeroporto.manager ! CodeTerminate
       }
-      Thread.sleep(1000)
+      Thread.sleep(1000)//occupa la pista per 1 secondo
       a.arrivo.richiestaAtterraggio ! ChiediAtterraggio(a)
 
     case Atterra(a: Aereo, ritardo: Boolean) =>
       println(a.name + " atterra a " + aeroporto.nome + " (in ritardo? " + ritardo + ")" /* + " " + sender*/ )
-      Thread.sleep(1000)
+      Thread.sleep(1000) //occupa la pista per 1 secondo
       arrivati = arrivati + 1
       if (partiti == partenze && arrivi == arrivati) {
         println("FINE " + aeroporto.nome)
@@ -239,7 +239,7 @@ class Aeroporto(n: String) extends {
               pista ! Decolla(a, false) //UsaPista(a.name + " decolla da " + a.partenza.nome)
             case None =>
           }
-
+           Thread.sleep(1200)//attendo che il volo arrivi
         case "A" =>
           val future = richiestaAtterraggio ? FaiAtterrare
           val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
@@ -247,6 +247,7 @@ class Aeroporto(n: String) extends {
             case Some(a) => pista ! Atterra(a, false) //UsaPista(a.name + " atterra da " + a.arrivo.nome)
             case None =>
           }
+          Thread.sleep(1200)//attendo che il volo arrivi
 
       }
 
@@ -261,7 +262,9 @@ class Aeroporto(n: String) extends {
 class Manager(system: ActorSystem) extends Actor {
 
   def receive = {
-    case CodeTerminate => system.shutdown
+    case CodeTerminate => 
+      println(System.nanoTime())
+      system.shutdown
 
   }
   
