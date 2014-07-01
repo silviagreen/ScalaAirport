@@ -19,15 +19,17 @@ object Simulazione extends App{
   
 
   def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String /*, correctType: String=>Boolean*/ ): Boolean = {
-    if (args.size < 2) {
-      println("Errore: Sono richiesti due parametri numerici")
-      false
-    } else {
-      if (!isAllDigit(nAeroporti) || !isAllDigit(nAerei)) {
-        println("Errore: inseriti parametri non numerici")
-        false
-      } else true
+    args.size match {
+      case x if x < 2 => println("Errore: Sono richiesti due parametri numerici")
+    		  			false
+      case x if x >= 2 => (!isAllDigit(nAeroporti) || !isAllDigit(nAerei)) match {
+        case true => println("Errore: inseriti parametri non numerici")
+        			 false
+        case false => true
+      }
     }
+
+  
   }
 
   var i = 0
