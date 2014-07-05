@@ -117,8 +117,6 @@ class ControlTower (a:Airport) extends Thread{
 	    Thread.sleep(2000);
 	  }
 	  
-	 // System.out.println("Number of active threads from the given thread: " + Thread.activeCount());
-	  //println(System.nanoTime())
 	}
 	
 	

@@ -1,7 +1,9 @@
 package ImperativeAirport
 
-import scala.collection.mutable.ListBuffer;
-import scala.util.Random;
+import scala.collection.mutable.ListBuffer
+import scala.util.Random
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.ResizableArray
 
 
 /**
@@ -12,7 +14,34 @@ import scala.util.Random;
  */
 object SystemGenerator {
 
-  def isAllDigits(x: String) = x forall Character.isDigit
+  //def isAllDigits(x: String) = x forall Character.isDigit
+  
+  def isAllDigits(x : String):Boolean = {
+    var chars = x.toCharArray()
+    for(x <- chars){
+      if(!x.isDigit)
+        return false
+    }
+    return true
+  }
+  
+   def swap[T](array: ArrayBuffer[T], a: Int, b: Int): ArrayBuffer[T] = {
+    val h = array(a)
+    array(a) = array(b)
+    array(b) = h
+    return array
+  }
+
+  
+  def startWithDeparture(l:ArrayBuffer[String]):ArrayBuffer[String] = {
+    if(l(0).equalsIgnoreCase("D")) return l
+    else {
+      var index = l.indexOf("D");    
+      var timetable = swap[String](l, 0, index)
+      return timetable
+    }
+    
+  }
   
   def main(args: Array[String]): Unit = { 
     
@@ -52,6 +81,9 @@ object SystemGenerator {
     val startAirports = new Thread(new Runnable {
     	def run() {
     		for(p <- airportList){
+    		  p.timetable = Random.shuffle(p.timetable)
+    		  p.timetable = startWithDeparture(p.timetable)
+    		  println(p.name + "\t" + p.timetable)
     		  p.activate();
     		}
     		
@@ -73,10 +105,6 @@ object SystemGenerator {
     //partenze mai in ritardo
     def compfn2(e1: String, e2: String) = {(e1.toLowerCase < e2.toLowerCase)}
     
-    for(a <- airportList){   
-     // a.timetable = a.timetable.sortWith(compfn2(_, _)).reverse//sortWith(compfn2)
-      println(a.name + "\t" + a.timetable)
-    }
     
     for(p <- planeList){
       p.start();
