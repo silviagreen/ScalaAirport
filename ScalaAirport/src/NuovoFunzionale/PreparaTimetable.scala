@@ -1,9 +1,11 @@
 package NuovoFunzionale
 
 import scala.util.Random
-import scala.collection.mutable.ArrayBuffer
+
 import akka.actor.ActorRef
 
+
+//estensione di una classe funzione
 class createTimetable[-ActorRef, -Aereo] extends Function2[ActorRef, (Aereo, Aereo), String] /*(T1, T2) => R*/ {
   def apply(x: ActorRef, y: (Aereo, Aereo)) = {
 
@@ -15,6 +17,16 @@ class createTimetable[-ActorRef, -Aereo] extends Function2[ActorRef, (Aereo, Aer
   }
 
 }
+/*
+class createTimetable extends Function2[Array[Array[Int]], Int, List[String]] {
+  def apply(matrix: Array[Array[Int]], airport:Int) = {
+    0 to matrix(airport).size match {
+      case x if x != 0 => 
+    }
+  }
+}*/
+
+//traits
 
 class PreparaTimetable(a: ActorRef) {
   val aeroporto = a
@@ -33,7 +45,7 @@ class PreparaTimetable(a: ActorRef) {
     // stringlist_(List.tabulate(arrivi.size)(i => "A") ++ List.tabulate(partenze.size)(i => "D"))
 
   }
-
+//ricorsione
   def recInit(rest: List[Aereo]): List[String] = {
     val generateTimetable = new createTimetable
     rest match {
@@ -68,7 +80,7 @@ trait Randomize extends PreparaTimetable {
 }
 
 trait StartWithDeparture extends PreparaTimetable {
-  
+  //funzione currificata
   def swap[T](a:Array[T])(i:Int)(j:Int): Array[T] = {
     val t = a(i)
       a(i) = a(j)
@@ -84,6 +96,7 @@ trait StartWithDeparture extends PreparaTimetable {
       a
     }*/
 
+  //ricorsione
   def allArrivals(rest: List[String]): Boolean = rest match {
     case head :: Nil => head match {
       case "A" => true
@@ -103,7 +116,7 @@ trait StartWithDeparture extends PreparaTimetable {
       case true => super.trasforma(l)
       case false if l.size > 1 => l(0) match {
         case "D" => super.trasforma(l)
-        case "A" =>
+        case "A" =>//currificazione all'opera
           val currySwap = swap[String](l.toArray)(0)_
           val firstP = l.indexOf("D")
           super.trasforma(currySwap(firstP).toList)

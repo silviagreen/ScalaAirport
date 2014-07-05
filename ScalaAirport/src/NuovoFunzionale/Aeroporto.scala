@@ -17,7 +17,7 @@ import scala.concurrent.Future
 import scala.concurrent.Await
 import akka.util.Timeout
 
-//Messaggi
+//Messaggi con pattern matching
 abstract class Messaggi
 case class DecollaInRitardo(a: Aereo) extends Messaggi
 case class AtterraInRitardo(a: Aereo) extends Messaggi
@@ -27,9 +27,11 @@ case object FaiDecollare extends Messaggi
 case object FaiAtterrare extends Messaggi
 case class Decolla(a: Aereo, ritardo: Boolean) extends Messaggi
 case class Atterra(a: Aereo, ritardo: Boolean) extends Messaggi
-case class CodeTerminate
+//case class CodeTerminate
 case class Start
 case class setTimetable(l:List[String])
+
+//sistema di attori, alcuni hanno un proprio stato interno
 
 class Aereo(p: ActorRef, a: ActorRef, n: String) {
 
