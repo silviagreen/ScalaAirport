@@ -17,16 +17,31 @@ object Simulazione extends App{
   
   val checkIfDigit = (x:String) => x forall Character.isDigit
 
-  def isAllDigit: PartialFunction[String, Boolean] = {
+  def isStringDigit: PartialFunction[Any, Boolean] = {
     case x: String => checkIfDigit(x)
   }
   
+  def isCharDigit: PartialFunction[Any, Boolean] = {
+    case x: Char => x.isDigit
+  }
+  
+  def isInteger: PartialFunction[Any, Boolean] = {
+    case x: Int => true
+  }
+  
+  def otherTypes: PartialFunction[Any, Boolean] = {
+    case _ => false
+  }
+  
+  def checkInput(x:Any) = (isInteger orElse isStringDigit orElse isCharDigit orElse otherTypes)(x)
+  
+ 
 
   def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String /*, correctType: String=>Boolean*/ ): Boolean = {
     args.size match {
       case x if x < 2 => println("Errore: Sono richiesti due parametri numerici")
     		  			false
-      case x if x >= 2 => (!isAllDigit(nAeroporti) || !isAllDigit(nAerei)) match {
+      case x if x >= 2 => (!(checkInput(nAeroporti) )|| !checkInput(nAerei)) match {
         case true => println("Errore: inseriti parametri non numerici")
         			 false
         case false => true
@@ -38,6 +53,13 @@ object Simulazione extends App{
 
   var i = 0
   var j = 0
+  
+  def nomeAeroporto = {
+    i = i + 1
+    "Aeroporto" + i}
+  def nomeAereo = { 
+    j = j + 1
+    "Aereo" + j} 
 
   def fallisci = println("La simulazione non può partire")
   
@@ -61,8 +83,9 @@ object Simulazione extends App{
     val nAeroporti: Int = n1 //.toInt
     val nAerei: Int = n2 //.toInt
     val aeroporti = 1 to nAeroporti map { _ =>
-      i = i + 1
-    system.actorOf(Props(new Aeroporto("Aeroporto" + i)), name = "Aeroporto" + i)
+   //   i = i + 1
+      val nome = nomeAeroporto
+    system.actorOf(Props(new Aeroporto(/*"Aeroporto" + i*/ nome )), name = /*"Aeroporto" + i*/nome)
       //new Aeroporto("Aeroporto" + (i))
 
     }
@@ -72,13 +95,14 @@ object Simulazione extends App{
     val aerei = 1 to nAerei map {
       _ =>
         val idx = Random.shuffle(index)
-        j = j + 1
-        println("aereo" + j + "\t" + aeroporti(idx(0)).path + "\t" + aeroporti(idx(1)).path)
-        new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), "aereo" + j)
+      //  j = j + 1
+        val nome = nomeAereo
+        println(nome + "\t" + aeroporti(idx(0)).path + "\t" + aeroporti(idx(1)).path)
+        new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), /*"aereo" + j*/ nome)
     }
 
     aeroporti map { a: ActorRef =>
-      val tt = new PreparaTimetable(a) //with StartWithDeparture with Normalizza with Randomize
+      val tt = new PreparaTimetable(a) with StartWithDeparture with Normalizza with Randomize
       //a.timetable = tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList))
       a ! setTimetable(tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList)))
       reaper ! WatchMe(a)

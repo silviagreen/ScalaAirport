@@ -1,4 +1,4 @@
-package FunPlusSembraOOk
+package FunPlusSembraQuasiOk
 
 import scala.collection.mutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global

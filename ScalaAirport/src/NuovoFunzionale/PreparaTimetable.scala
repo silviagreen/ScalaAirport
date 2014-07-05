@@ -68,14 +68,21 @@ trait Randomize extends PreparaTimetable {
 }
 
 trait StartWithDeparture extends PreparaTimetable {
+  
+  def swap[T](a:Array[T])(i:Int)(j:Int): Array[T] = {
+    val t = a(i)
+      a(i) = a(j)
+      a(j) = t
+      a
+  }
 
-  def swap[T](a: Array[T], i: Int, j: Int): Array[T] =
+ /* def swap[T](a: Array[T], i: Int, j: Int): Array[T] =
     {
       val t = a(i)
       a(i) = a(j)
       a(j) = t
       a
-    }
+    }*/
 
   def allArrivals(rest: List[String]): Boolean = rest match {
     case head :: Nil => head match {
@@ -97,8 +104,10 @@ trait StartWithDeparture extends PreparaTimetable {
       case false if l.size > 1 => l(0) match {
         case "D" => super.trasforma(l)
         case "A" =>
+          val currySwap = swap[String](l.toArray)(0)_
           val firstP = l.indexOf("D")
-          super.trasforma(swap[String](l.toArray, 0, firstP).toList)
+          super.trasforma(currySwap(firstP).toList)
+          //super.trasforma(swap[String](l.toArray, 0, firstP).toList)
       }
       case _ => super.trasforma(l)
     }
