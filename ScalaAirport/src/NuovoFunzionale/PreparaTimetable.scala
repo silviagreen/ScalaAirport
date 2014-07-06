@@ -75,12 +75,22 @@ trait Randomize extends PreparaTimetable {
 trait StartWithDeparture extends PreparaTimetable {
   
   //funzione currificata
-  def swap[T](a:Array[T])(i:Int)(j:Int): Array[T] = {
+  /*ITERATIVA
+   * def swap[T](a:Array[T])(i:Int)(j:Int): Array[T] = {
     val t = a(i)
       a(i) = a(j)
       a(j) = t
       a
+  }*/
+  
+  //FUNZIONALE
+  def swap[T](l:List[T])(i:Int)(j:Int): List[T] = {
+    val (l1, rest1) = l.splitAt(i - 1)
+    val (l2, rest2) = rest1.drop(1).splitAt(j - 1)
+    val l3 = rest2.drop(1)
+     l1 ::: l(j) :: l2 ::: l(i) :: l3
   }
+  
 
 
   //ricorsione
@@ -104,7 +114,7 @@ trait StartWithDeparture extends PreparaTimetable {
       case false if l.size > 1 => l(0) match {
         case "D" => super.trasforma(l)
         case "A" =>//currificazione all'opera
-          val currySwap = swap[String](l.toArray)(0)_
+          val currySwap = swap[String](l/*.toArray*/)(0)_
           val firstP = l.indexOf("D")
           super.trasforma(currySwap(firstP).toList)
       }
