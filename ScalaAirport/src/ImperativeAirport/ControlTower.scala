@@ -35,12 +35,7 @@ class ControlTower (a:Airport) extends Thread{
 	}
 	
 	def setNextTransit(index:Int) = {
-	 /* if(nextTransit.equals("A"))
-	    nextTransit = "D";
-	  else
-	    nextTransit = "A";*/
-	  nextTransit = timetable(index);
-	  
+	  nextTransit = timetable(index);	  
 	}
 	
 	def putPlaneOnTrack(p:Airplane, isLanding:Boolean) = {
@@ -61,18 +56,14 @@ class ControlTower (a:Airport) extends Thread{
 	   var plane = new Airplane(null, null, "");
 	  departuresQueue.synchronized{
 	    if(departuresQueue.isEmpty){
-	      println("coda partenze vuota, creo");
+	      println("coda partenze vuota, creo waiting");
 	      new Waiting(departuresQueue, false).start();
 	      return;
 	    }else{
 	      plane = departuresQueue.dequeue();
 	    }
-	  }
-	  
-	  
-	    putPlaneOnTrack(plane, false);
-	  
-	
+	  }	  	  
+	    putPlaneOnTrack(plane, false);	  	
 	}
 	
 	
@@ -86,37 +77,23 @@ class ControlTower (a:Airport) extends Thread{
 	    }else{
 	      plane = arrivalsQueue.dequeue()
 	    }
-	  }
-	  
-	 
-	    putPlaneOnTrack(plane, true);
-	  
+	  } 
+	    putPlaneOnTrack(plane, true);	  
 	}
-	
-	/*def getDepartures(){
-	  return departuresQueue;
-	}
-	
-	def getArrivals(){
-	  return arrivalsQueue;
-	}*/
-	
+
 	override def run(){
 	  var k = 1;
 	  while(k <= timetable.size){
 	    setNextTransit(k - 1);
 	    if(nextTransit.equals("A")){
-	      handleArrival();
-	     
+	      handleArrival();	     
 	     }
 	    else{
-	      handleDeparture();
-	      
+	      handleDeparture();	      
 	       }
 	    k = k + 1;
 	    Thread.sleep(2000);
-	  }
-	  
+	  }	  
 	}
 	
 	

@@ -27,7 +27,7 @@ class Airport (n:String){
 	  controlTower.addArrival(p);
 	}
 	
-	def activate() = {
+	def activate = {
 	  controlTower.start();
 	  println("Torre di Controllo aeroporto di " + name + " attivata" );
 	}

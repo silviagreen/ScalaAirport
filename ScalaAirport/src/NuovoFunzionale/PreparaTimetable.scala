@@ -17,22 +17,13 @@ class createTimetable[-ActorRef, -Aereo] extends Function2[ActorRef, (Aereo, Aer
   }
 
 }
-/*
-class createTimetable extends Function2[Array[Array[Int]], Int, List[String]] {
-  def apply(matrix: Array[Array[Int]], airport:Int) = {
-    0 to matrix(airport).size match {
-      case x if x != 0 => 
-    }
-  }
-}*/
 
 //traits
-
 class PreparaTimetable(a: ActorRef) {
   val aeroporto = a
 
 
-
+/* //versione iterativa dell'argoritmo di inizializzazione della timetable
   def init(l: List[Aereo]) = {
     val generateTimetable = new createTimetable
     var i = -1
@@ -40,11 +31,11 @@ class PreparaTimetable(a: ActorRef) {
       i = i + 1
       generateTimetable(a, (l(i).partenza, l(i).arrivo))
     }
-
     timetable.toList
-    // stringlist_(List.tabulate(arrivi.size)(i => "A") ++ List.tabulate(partenze.size)(i => "D"))
 
   }
+ */ 
+  
 //ricorsione
   def recInit(rest: List[Aereo]): List[String] = {
     val generateTimetable = new createTimetable
@@ -60,6 +51,7 @@ class PreparaTimetable(a: ActorRef) {
 
 }
 
+//trait per normalizzare la timetable
 trait Normalizza extends PreparaTimetable {
 
   override def trasforma(l: List[String]) = {
@@ -70,16 +62,18 @@ trait Normalizza extends PreparaTimetable {
 
 }
 
+//trait per randomizzare la timetable
 trait Randomize extends PreparaTimetable {
   override def trasforma(l: List[String]) = {
     val lr = Random.shuffle(l)
-    //println("randomizzo");
     super.trasforma(lr)
 
   }
 }
 
+//trait per far partire la timetable con una partenza
 trait StartWithDeparture extends PreparaTimetable {
+  
   //funzione currificata
   def swap[T](a:Array[T])(i:Int)(j:Int): Array[T] = {
     val t = a(i)
@@ -88,13 +82,6 @@ trait StartWithDeparture extends PreparaTimetable {
       a
   }
 
- /* def swap[T](a: Array[T], i: Int, j: Int): Array[T] =
-    {
-      val t = a(i)
-      a(i) = a(j)
-      a(j) = t
-      a
-    }*/
 
   //ricorsione
   def allArrivals(rest: List[String]): Boolean = rest match {
@@ -110,7 +97,7 @@ trait StartWithDeparture extends PreparaTimetable {
 
   }
 
-  override def trasforma(l: List[String]) = { //println("con D all'inizio")
+  override def trasforma(l: List[String]) = { 
     l.toArray
     allArrivals(l) match {
       case true => super.trasforma(l)
@@ -120,7 +107,6 @@ trait StartWithDeparture extends PreparaTimetable {
           val currySwap = swap[String](l.toArray)(0)_
           val firstP = l.indexOf("D")
           super.trasforma(currySwap(firstP).toList)
-          //super.trasforma(swap[String](l.toArray, 0, firstP).toList)
       }
       case _ => super.trasforma(l)
     }

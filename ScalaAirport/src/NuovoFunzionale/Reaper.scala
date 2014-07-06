@@ -2,23 +2,26 @@ package NuovoFunzionale
 
 import akka.actor.{Actor, ActorRef, Terminated}
 import scala.collection.mutable.ArrayBuffer
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy._
  
+/**
+ * L'attore reaper è stato creato per poter "spegnere" l'actor system una volta che tutti gli aeroporti hanno terminato il loro lavoro e sono stati terminati
+ */
 object Reaper {
-  // Used by others to register an Actor for watching
+  // messaggio che consente all'oggetto reaper di aggiungere un ActorRef da osservare
   case class WatchMe(ref: ActorRef)
 }
  
 abstract class Reaper extends Actor {
   import Reaper._
  
-  // Keep track of what we're watching
+  // Tiene traccia degli attori sotto osservazione
   val watched = ArrayBuffer.empty[ActorRef]
  
-  // Derivations need to implement this method.  It's the
-  // hook that's called when everything's dead
   def allSoulsReaped(): Unit
  
-  // Watch and check for termination
+  // Osserva se gli attori sotto osservazione terminano
   final def receive = {
     case WatchMe(ref) =>
       context.watch(ref)
@@ -27,6 +30,11 @@ abstract class Reaper extends Actor {
       println(ref.path + " Terminato")
       watched -= ref
       if (watched.isEmpty) allSoulsReaped()
+  }
+  
+   override val supervisorStrategy = OneForOneStrategy() {
+    case _: NullPointerException => Resume
+    case _: Exception => Escalate
   }
 }
 

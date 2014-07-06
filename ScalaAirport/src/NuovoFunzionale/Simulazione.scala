@@ -60,10 +60,19 @@ object Simulazione extends App {
 
   def fallisci = println("La simulazione non può partire")
 
-  def decolloAerei(aerei: List[Aereo]) = {
+  def decolloAerei(aerei: List[Aereo]) = Future{
     aerei.par foreach { a =>
       a.partenza ! ChiediDecollo(a)
       Thread.sleep(1500)
+    }
+  }
+  
+  def setTimetables(aerei: List[Aereo], aeroporti: List[ActorRef], reaper: ActorRef) = Future {
+    //trait con modifiche impilabili (l'ordine conta!!!!), funzioni anonime passate come argomento di altre funzioni
+    aeroporti map { a: ActorRef =>
+      val tt = new PreparaTimetable(a) with StartWithDeparture with Normalizza with Randomize
+      a ! setTimetable(tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList)))
+      reaper ! WatchMe(a)
     }
   }
 
@@ -71,33 +80,7 @@ object Simulazione extends App {
     aeroporti.par foreach (a => a ! Start)
   }
 
-  /* def generaMatrice(nAerei:Int, nAeroporti:Int) = {
-     val list = Random.shuffle(List.range(1, nAerei + 1, 1) ::: List.fill((nAeroporti * nAeroporti) - nAerei - nAeroporti)(0))
-    val array = Array.fill(nAeroporti)(Array.fill(nAeroporti)(0))
-    
-    var idx = 0
-    
-    0 until nAeroporti foreach { row => 
-     0 until nAeroporti foreach { col => 
-       row == col match {
-         case true => array(row)(col) = 0
-         case false => list(idx)
-         				idx = idx + 1
-       }
-       
-     	} 
-     }*/
-  /* for (i <- 0 until nAeroporti) {
-      for (k <- 0 until nAeroporti) {
-        if (k == i) {
-          array(i)(k) = 0
-        } else {
-          array(i)(k) = list(idx)
-          idx = idx + 1
-        }
-      }
-    }*/
-  //}
+
 
   def creaSistema(n1: String, n2: String) = {
     //conversioni implicite
@@ -107,14 +90,11 @@ object Simulazione extends App {
 
     val reaper = system.actorOf(Props(new ProductionReaper))
 
-    val nAeroporti: Int = n1 //.toInt
-    val nAerei: Int = n2 //.toInt
+    val nAeroporti: Int = n1 //conversione implicita
+    val nAerei: Int = n2 //conversione implicita
     val aeroporti = 1 to nAeroporti map { _ =>
-      //   i = i + 1
       val nome = nomeAeroporto
-      system.actorOf(Props(new Aeroporto( /*"Aeroporto" + i*/ nome)), name = /*"Aeroporto" + i*/ nome)
-      //new Aeroporto("Aeroporto" + (i))
-
+      system.actorOf(Props(new Aeroporto( nome)), name = nome)
     }
 
     println("NOME" + "\t" + "PARTENZA" + "\t" + "ARRIVO")
@@ -125,18 +105,15 @@ object Simulazione extends App {
         //  j = j + 1
         val nome = nomeAereo
         println(nome + "\t" + aeroporti(idx(0)).path + "\t" + aeroporti(idx(1)).path)
-        new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), /*"aereo" + j*/ nome)
+        new Aereo(aeroporti(idx(0)), aeroporti(idx(1)), nome)
     }
 
-    //trait con modifiche impilabili, funzioni anonime passate come argomento di altre funzioni
-    aeroporti map { a: ActorRef =>
-      val tt = new PreparaTimetable(a) with StartWithDeparture with Normalizza with Randomize
-      a ! setTimetable(tt.trasforma(tt.recInit((aerei filter (_.partenza.equals(a))).toList ++ (aerei filter (_.arrivo.equals(a))).toList)))
-      reaper ! WatchMe(a)
-    }
-
-    decolloAerei(aerei)
-    attivazioneAeroporti(aeroporti)
+    //prima aggiungo gli aerei alle code di partenza dei rispettivi aeroporti di partenza
+    //e setto le timetable
+    //fatto ciò, posso dare lo start agli aeroporti
+    for {
+      t <- setTimetables(aerei, aeroporti, reaper)
+      a <- decolloAerei(aerei)} yield attivazioneAeroporti(aeroporti)
 
 
   }

@@ -18,7 +18,7 @@ class Airplane (d: Airport, a: Airport, n:String){
 	private var arrived = false;
 	
 	def start(){
-	  d.addDeparture(this);
+	  departure.addDeparture(this);
 	  println(name + " aspetta di partire...");
 	}
 	
@@ -32,10 +32,4 @@ class Airplane (d: Airport, a: Airport, n:String){
 	   println("Aereo " + name + " e atterrato a " + a.name);
 	}
 	
-	/*def print(){
-	  if(departed && ! arrived)
-		  println("Aereo " + n + "e decollato");
-	  else if(departed && arrived)
-		  println("Aereo " + n + "e atterrato");
-	}*/
 }

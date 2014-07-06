@@ -10,11 +10,11 @@ import scala.collection.mutable.ResizableArray
  * Genera il sistema di aeroporti.
  * Occorre dare in input il numero di aeroporti e aerei da creare.
  * Durante la creazione degli aerei crea la timetable degli aeroporti.
- * A fine creazione, delega a due thread l'attivazione di aerei e aeroporti.
+ * A fine creazione, si ha l'attivazione di aerei e aeroporti.
+ * 
+ * Ogni tabella oraria è costruita casualmente ma sempre con una D come primo elemento
  */
 object SystemGenerator {
-
-  //def isAllDigits(x: String) = x forall Character.isDigit
   
   def isAllDigits(x : String):Boolean = {
     var chars = x.toCharArray()
@@ -84,35 +84,20 @@ object SystemGenerator {
     		  p.timetable = Random.shuffle(p.timetable)
     		  p.timetable = startWithDeparture(p.timetable)
     		  println(p.name + "\t" + p.timetable)
-    		  p.activate();
+    		  p.activate;
     		}
     		
     	}
     });
     
- /*   val startPlanes = new Thread(new Runnable() {
-		def run() {
-		  println(System.nanoTime());
-			for (p <- planeList){
-			  p.start();
-			  Thread.sleep(1500);
-			}
-		}
-	});
     
-    startPlanes.start();*/
-    
-    //partenze mai in ritardo
-    def compfn2(e1: String, e2: String) = {(e1.toLowerCase < e2.toLowerCase)}
-    
-    
+    //partenze mai in ritardo  
     for(p <- planeList){
       p.start();
       Thread.sleep(1500);
     }
       
     startAirports.start();
-    //14.505216481 Seconds
     
   }
   }

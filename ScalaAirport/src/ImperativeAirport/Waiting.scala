@@ -17,7 +17,7 @@ class Waiting (wq:Queue[Airplane], landing:Boolean) extends Thread{
 	  queue.synchronized{
 	    while(queue.isEmpty)
 	      queue.wait();
-	    
+	    //se si sveglia significa che la coda non è più vuota
 	    plane = queue.dequeue();
 	  }
 	  //è arrivato un aereo, può usare la pista
