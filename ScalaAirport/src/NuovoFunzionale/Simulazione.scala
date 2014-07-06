@@ -7,6 +7,7 @@ import scala.util.Random
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.ActorRef
+import scala.language.implicitConversions
 
 object Simulazione extends App {
 
