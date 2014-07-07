@@ -6,8 +6,8 @@ import akka.actor.ActorRef
 
 
 //estensione di una classe funzione
-class createTimetable[-ActorRef, -Aereo] extends Function2[ActorRef, (Aereo, Aereo), String] /*(T1, T2) => R*/ {
-  def apply(x: ActorRef, y: (Aereo, Aereo)) = {
+class createTimetable[-ActorRef] extends Function2[ActorRef, (ActorRef, ActorRef), String] /*(T1, T2) => R*/ {
+  def apply(x: ActorRef, y: (ActorRef, ActorRef)) = {
 
     x match {
       case y._1 => "D"
@@ -108,7 +108,7 @@ trait StartWithDeparture extends PreparaTimetable {
   }
 
   override def trasforma(l: List[String]) = { 
-    l.toArray
+    
     allArrivals(l) match {
       case true => super.trasforma(l)
       case false if l.size > 1 => l(0) match {
