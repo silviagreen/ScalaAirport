@@ -24,12 +24,12 @@ class Waiting (wq:Queue[Airplane], landing:Boolean) extends Thread{
 	  
 	  if(isLanding){
 		  plane.arrival.track.synchronized{
-			  plane.landing();
+			  plane.landing(true);
 		  }
 		  
 	  }else{
 	    plane.departure.track.synchronized{
-	      plane.takeOff();
+	      plane.takeOff(true);
 	    }
 	    Thread.sleep(500);
 	    plane.arrival.addArrival(plane);

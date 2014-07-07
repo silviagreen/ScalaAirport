@@ -16,13 +16,14 @@ class ControlTower (a:Airport) extends Thread{
 	var nextTransit = "A";
 	private var arrivalsQueue = new Queue[Airplane];
 	private var departuresQueue = new Queue[Airplane];
-	private val timetable = a.getTimeTable;
+	private var timetable = a.getTimeTable;
 	var i = 4;
 	
 	def addDeparture(p:Airplane) = {
 	  departuresQueue.synchronized{
 	    departuresQueue += p;
 	    departuresQueue.notifyAll();
+	    println(p.name + " added")
 	  }
 	  
 	}
@@ -41,11 +42,11 @@ class ControlTower (a:Airport) extends Thread{
 	def putPlaneOnTrack(p:Airplane, isLanding:Boolean) = {
 	  if(isLanding){
 		  airport.track.synchronized{
-			  p.landing();
+			  p.landing(false);
 		  }
 	  }else{
 		  airport.track.synchronized{
-		    p.takeOff();
+		    p.takeOff(false);
 		  }
 		  Thread.sleep(500);
 		  p.arrival.addArrival(p);
@@ -56,7 +57,7 @@ class ControlTower (a:Airport) extends Thread{
 	   var plane = new Airplane(null, null, "");
 	  departuresQueue.synchronized{
 	    if(departuresQueue.isEmpty){
-	      println("coda partenze vuota, creo waiting");
+	      println(airport.name + " ha coda partenze vuota, creo waiting");
 	      new Waiting(departuresQueue, false).start();
 	      return;
 	    }else{
@@ -71,17 +72,19 @@ class ControlTower (a:Airport) extends Thread{
 	  var plane = new Airplane(null, null, "");
 	  arrivalsQueue.synchronized{
 	    if(arrivalsQueue.isEmpty){
-	      println("coda arrivi vuota, creo");
+	      println(airport.name + " ha coda arrivi vuota, creo");
 	      new Waiting(arrivalsQueue, true).start();
 	      return;
 	    }else{
-	      plane = arrivalsQueue.dequeue()
+	      plane = arrivalsQueue.dequeue();
 	    }
 	  } 
 	    putPlaneOnTrack(plane, true);	  
 	}
 
 	override def run(){
+	  timetable = a.getTimeTable;//devo aggiornarla perchè ci ho applicato randomize e startwithDeparture
+	  println(airport.name + "\t" + timetable)
 	  var k = 1;
 	  while(k <= timetable.size){
 	    setNextTransit(k - 1);

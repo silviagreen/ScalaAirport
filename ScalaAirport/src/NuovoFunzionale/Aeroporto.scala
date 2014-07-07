@@ -123,7 +123,7 @@ class GestoreRitardi extends Actor {
 class GestoreAtterraggi extends Actor {
 
 
-  private var arrivi = Queue[Aereo]()
+  private val arrivi = Queue[Aereo]()
   private var ritardiA = 0
 
 
@@ -172,7 +172,7 @@ class GestoreAtterraggi extends Actor {
  */
 class GestoreDecolli extends Actor {
 
-  private var partenze = Queue[Aereo]()
+  private val partenze = Queue[Aereo]()
   private var ritardi = 0
 
   def receive = {

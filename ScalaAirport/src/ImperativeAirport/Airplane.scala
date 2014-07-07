@@ -22,14 +22,14 @@ class Airplane (d: Airport, a: Airport, n:String){
 	  println(name + " aspetta di partire...");
 	}
 	
-	def takeOff(){
+	def takeOff(late:Boolean){
 	  departed = true;
-	  println("Aereo " + name + " e decollato da " + d.name);
+	  println("Aereo " + name + " e decollato da " + d.name + " in ritardo? " + late);
 	}
 	
-	def landing(){
+	def landing(late:Boolean){
 	  arrived = true;
-	   println("Aereo " + name + " e atterrato a " + a.name);
+	   println("Aereo " + name + " e atterrato a " + a.name + " in ritardo? " + late);
 	}
 	
 }

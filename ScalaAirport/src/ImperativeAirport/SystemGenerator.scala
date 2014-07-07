@@ -91,7 +91,7 @@ object SystemGenerator {
               p.timetable = Random.shuffle(p.timetable)
               p.timetable = startWithDeparture(p.timetable)
             }
-            println(p.name + "\t" + p.timetable)
+            
             p.activate;
           }
 
