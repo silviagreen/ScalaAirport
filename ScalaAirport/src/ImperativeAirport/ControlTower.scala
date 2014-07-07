@@ -40,11 +40,11 @@ class ControlTower (a:Airport) extends Thread{
 	
 	def putPlaneOnTrack(p:Airplane, isLanding:Boolean) = {
 	  if(isLanding){
-		  a.track.synchronized{
+		  airport.track.synchronized{
 			  p.landing();
 		  }
 	  }else{
-		  a.track.synchronized{
+		  airport.track.synchronized{
 		    p.takeOff();
 		  }
 		  Thread.sleep(500);

@@ -22,7 +22,7 @@ class Waiting (wq:Queue[Airplane], landing:Boolean) extends Thread{
 	  }
 	  //è arrivato un aereo, può usare la pista
 	  
-	  if(landing){
+	  if(isLanding){
 		  plane.arrival.track.synchronized{
 			  plane.landing();
 		  }
