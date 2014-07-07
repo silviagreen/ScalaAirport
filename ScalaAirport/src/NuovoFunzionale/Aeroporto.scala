@@ -94,8 +94,8 @@ class Pista(nPartenze : Int, nArrivi:Int) extends Actor {
 /**
  * Attore che deve riceve gli aerei arrivati/partiti in ritardo e li accoda per l'utilizzo della pista
  */
-class GestoreRitardi(a: Aeroporto) extends Actor {
-  private val aeroporto = a
+class GestoreRitardi extends Actor {
+  
   def receive = {
     case DecollaInRitardo(a: Aereo) =>
       println(a.name + " decolla in ritardo")
@@ -120,9 +120,9 @@ class GestoreRitardi(a: Aeroporto) extends Actor {
  * 	-coda degli aerei in arrivo
  *  -numero di ritardi negli arrivi
  */
-class GestoreAtterraggi(a: ActorRef) extends Actor {
+class GestoreAtterraggi extends Actor {
 
-  private val aeroporto = a
+
   private var arrivi = Queue[Aereo]()
   private var ritardiA = 0
 
@@ -149,7 +149,7 @@ class GestoreAtterraggi(a: ActorRef) extends Actor {
           mittente ! Some(aereo)
         case Failure(f) =>
           ritardiA = ritardiA + 1
-          println("nessun aereo da far atterrare in " + a.path +", ritardi " + ritardiA)
+          println("nessun aereo da far atterrare in " + context.parent.path +", ritardi " + ritardiA)
           mittente ! None
 
       }
@@ -170,8 +170,8 @@ class GestoreAtterraggi(a: ActorRef) extends Actor {
  * 	-coda degli aerei in partenza
  *  -numero di ritardi negli partenza
  */
-class GestoreDecolli(a: ActorRef) extends Actor {
-  private val aeroporto = a
+class GestoreDecolli extends Actor {
+
   private var partenze = Queue[Aereo]()
   private var ritardi = 0
 
@@ -193,7 +193,7 @@ class GestoreDecolli(a: ActorRef) extends Actor {
           println("ok decollo di  " + aereo.name)
           mittente ! Some(aereo)
         case Failure(f) =>
-          println("nessun aereo da far decollare in " + a.path + ", ritardi " + ritardi)
+          println("nessun aereo da far decollare in " + context.parent.path + ", ritardi " + ritardi)
           ritardi = ritardi + 1
           mittente ! None
       }
@@ -227,9 +227,9 @@ class Aeroporto(n: String) extends Actor{
   def nome = _nome
 
   private var _pista: ActorRef = _
-  private val _richiestaDecollo = context.actorOf(Props(new GestoreDecolli(self)), name = "richiestaDecollo")
-  private val _richiestaAtterraggio = context.actorOf(Props(new GestoreAtterraggi(self)), name = "richiestaAtterraggio")
-  private val _gestoreRitardi = context.actorOf(Props(new GestoreRitardi(this)), name = "gestoreRitardi")
+  private val _richiestaDecollo = context.actorOf(Props(new GestoreDecolli), name = "richiestaDecollo")
+  private val _richiestaAtterraggio = context.actorOf(Props(new GestoreAtterraggi), name = "richiestaAtterraggio")
+  private val _gestoreRitardi = context.actorOf(Props(new GestoreRitardi), name = "gestoreRitardi")
 
   def pista = _pista
   def richiestaDecollo = _richiestaDecollo
