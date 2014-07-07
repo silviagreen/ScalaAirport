@@ -28,7 +28,7 @@ case object FaiDecollare extends Messaggi
 case object FaiAtterrare extends Messaggi
 case class Decolla(a: Aereo, ritardo: Boolean) extends Messaggi
 case class Atterra(a: Aereo, ritardo: Boolean) extends Messaggi
-//case class CodeTerminate
+case class Done
 case object Start
 case class setTimetable(l:List[String])
 
@@ -65,7 +65,9 @@ class Pista(nPartenze : Int, nArrivi:Int) extends Actor {
   private var arrivati = 0
   def receive = {
     case Decolla(a: Aereo, ritardo: Boolean) =>
+      val mittente = sender
       println(a.name + " decolla da " + /*aeroporto.nome*/context.parent.path + " (in ritardo? " + ritardo + ")" )
+     
       partiti = partiti + 1
        (partiti == partenze && arrivi == arrivati) match {
         case true => context.parent ! Stop
@@ -73,14 +75,28 @@ class Pista(nPartenze : Int, nArrivi:Int) extends Actor {
       }
       Thread.sleep(500)//occupa la pista
       (a.arrivo) ! ChiediAtterraggio(a)
+      
+       ritardo match {
+        case false => 
+          println("no ritardo " + mittente)
+          mittente ! "Done"
+          println("decollato ")
+        case true => 
+      }
 
     case Atterra(a: Aereo, ritardo: Boolean) =>
+      val mittente = sender
       println(a.name + " atterra a " + context.parent.path + " (in ritardo? " + ritardo + ")" )
+      
       Thread.sleep(500) //occupa la pista
       arrivati = arrivati + 1
       (partiti == partenze && arrivi == arrivati) match {
         case true => context.parent ! Stop
         case false => 
+      }
+      ritardo match {
+        case false => mittente ! "Done"
+        case true => 
       }
   }
 
@@ -247,20 +263,31 @@ class Aeroporto(n: String) extends Actor{
         for (t <- timetable) yield {
       t match {
         case "D" =>
-
+        println(nome + " D")
           val future = richiestaDecollo ? FaiDecollare
           val result = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
           result match {
-            case Some(a) =>
-              pista ! Decolla(a, false)
+            case Some(a) => 
+              val future2 = pista ? Decolla(a, false)
+              val result = Await.result(future2, timeout.duration).asInstanceOf[String]
+              result match {
+              case _ => println("fatto")
+            }
             case None =>
           }
            Thread.sleep(2000)//attendo che il volo arrivi
         case "A" =>
+           println(nome + " A")
           val future = richiestaAtterraggio ? FaiAtterrare
           val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
           results match {
-            case Some(a) => pista ! Atterra(a, false)
+            case Some(a) => 
+              
+              val future3 = pista ? Atterra(a, false)
+              val result = Await.result(future3, timeout.duration).asInstanceOf[String]
+            result match {
+              case _ => println("fatto")
+            }
             case None =>
           }
           Thread.sleep(2000)//attendo che il volo arrivi
