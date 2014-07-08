@@ -29,10 +29,9 @@ case object FaiDecollare extends Messaggi
 case object FaiAtterrare extends Messaggi
 case class Decolla(a: Aereo, ritardo: Boolean) extends Messaggi
 case class Atterra(a: Aereo, ritardo: Boolean) extends Messaggi
-case class Done
+case object Done
 case object Start
 case class setTimetable(l: List[String])
-case object Done
 case object Next
 //sistema di attori, alcuni hanno un proprio stato interno
 
