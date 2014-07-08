@@ -10,7 +10,7 @@ import akka.actor.ActorRef
 import scala.language.implicitConversions
 
 object Simulazione extends App {
-
+import Names._
   //funzioni parziali  
   val checkIfDigit = (x: String) => x forall Character.isDigit
 
@@ -63,7 +63,7 @@ object Simulazione extends App {
 
   def decolloAerei(aerei: List[Aereo], system : ActorSystem) = Future{
     aerei.par foreach { a =>
-      system.actorSelection(a.partenza.path + "/richiestaDecollo") ! ChiediDecollo(a)
+      system.actorSelection(a.partenza.path + "/" + gestoreDecolli) ! ChiediDecollo(a)
       Thread.sleep(1500)
     }
   }
