@@ -9,11 +9,11 @@ import scala.collection.mutable.Queue;
  * Ritardo = coda delle partenze (o arrivi) vuota
  */
 class Waiting (wq:Queue[Airplane], landing:Boolean) extends Thread{
-	var queue = wq;
-	var isLanding = landing;
+	var queue : Queue[Airplane] = wq;
+	var isLanding : Boolean = landing;
 	
 	override def run(){
-	  var plane = new Airplane(null,null,"");
+	  var plane = new Airplane();
 	  queue.synchronized{
 	    while(queue.isEmpty)
 	      queue.wait();

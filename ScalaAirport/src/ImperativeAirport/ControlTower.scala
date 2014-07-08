@@ -1,6 +1,7 @@
 package ImperativeAirport
 
 import scala.collection.mutable.Queue;
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Classe che rappresenta una Torre di Controllo di un aeroporto.
@@ -12,34 +13,33 @@ import scala.collection.mutable.Queue;
  * Quando un aereo è un ritardo, delega un thread per attenderlo e farlo atterrare/decollare non appena la pista si libera.
  */
 class ControlTower (a:Airport) extends Thread{
-	var airport = a;
-	var nextTransit = "A";
-	private var arrivalsQueue = new Queue[Airplane];
-	private var departuresQueue = new Queue[Airplane];
-	private var timetable = a.getTimeTable;
+	var airport:Airport = a;
+	var nextTransit:String = "A";
+	private var arrivalsQueue: Queue[Airplane] = new Queue[Airplane];
+	private var departuresQueue: Queue[Airplane] = new Queue[Airplane];
+	private var timetable: ArrayBuffer[String] = a.getTimeTable;
 	var i = 4;
 	
-	def addDeparture(p:Airplane) = {
+	def addDeparture(p:Airplane):Unit = {
 	  departuresQueue.synchronized{
 	    departuresQueue += p;
 	    departuresQueue.notifyAll();
-	    println(p.name + " added")
 	  }
 	  
 	}
 	
-	def addArrival(p:Airplane) = {
+	def addArrival(p:Airplane):Unit = {
 	  arrivalsQueue.synchronized{
 	    arrivalsQueue += p;
 	    arrivalsQueue.notifyAll();
 	  }
 	}
 	
-	def setNextTransit(index:Int) = {
+	def setNextTransit(index:Int):Unit = {
 	  nextTransit = timetable(index);	  
 	}
 	
-	def putPlaneOnTrack(p:Airplane, isLanding:Boolean) = {
+	def putPlaneOnTrack(p:Airplane, isLanding:Boolean) :Unit = {
 	  if(isLanding){
 		  airport.track.synchronized{
 			  p.landing(false);
@@ -53,8 +53,8 @@ class ControlTower (a:Airport) extends Thread{
 	  }
 	}
 	
-	def handleDeparture() {
-	   var plane = new Airplane(null, null, "");
+	def handleDeparture(): Unit = {
+	   var plane = new Airplane();
 	  departuresQueue.synchronized{
 	    if(departuresQueue.isEmpty){
 	      println(airport.name + " ha coda partenze vuota, creo waiting");
@@ -68,8 +68,8 @@ class ControlTower (a:Airport) extends Thread{
 	}
 	
 	
-	def handleArrival(){
-	  var plane = new Airplane(null, null, "");
+	def handleArrival(): Unit = {
+	  var plane = new Airplane();
 	  arrivalsQueue.synchronized{
 	    if(arrivalsQueue.isEmpty){
 	      println(airport.name + " ha coda arrivi vuota, creo");

@@ -19,25 +19,25 @@ object SystemGenerator {
     var chars = x.toCharArray()
     for (x <- chars) {
       if (!x.isDigit)
-        return false
+        false
     }
-    return true
+    true
   }
 
   def onlyArrivalsOrEmpty(a: ArrayBuffer[String]): Boolean = {
-    if (a.size == 0) return true
+    if (a.size == 0) true
     for (s <- a) {
       if (s.equalsIgnoreCase("D"))
-        return false
+        false
     }
-    return true
+    true
   }
 
   def swap[T](array: ArrayBuffer[T], a: Int, b: Int): ArrayBuffer[T] = {
     val h = array(a)
     array(a) = array(b)
     array(b) = h
-    return array
+    array
   }
 
   def startWithDeparture(l: ArrayBuffer[String]): ArrayBuffer[String] = {
@@ -45,7 +45,7 @@ object SystemGenerator {
     else {
       var index = l.indexOf("D");
       var timetable = swap[String](l, 0, index)
-      return timetable
+      timetable
     }
 
   }

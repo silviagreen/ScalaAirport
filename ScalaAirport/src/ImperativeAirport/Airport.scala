@@ -12,28 +12,28 @@ import scala.collection.mutable.ArrayBuffer
  * Quando un Aeroporto deve far atterrare/decollare un aereo, fa richiesta alla torre di controllo
  */
 class Airport (n:String){
-	var name = n;
-	var track = new Object();	//pista d'atterraggio
-	var timetable = ArrayBuffer[String]();
-	private var controlTower = new ControlTower(this);
+	var name: String= n;
+	var track:Object = new Object();	//pista d'atterraggio
+	var timetable:ArrayBuffer[String] = ArrayBuffer[String]();
+	private var controlTower:ControlTower = new ControlTower(this);
 	
 	
 	
-	def addDeparture(p:Airplane) = {
+	def addDeparture(p:Airplane):Unit  = {
 	  controlTower.addDeparture(p);
 	}
 	
-	def addArrival(p:Airplane) = {
+	def addArrival(p:Airplane):Unit = {
 	  controlTower.addArrival(p);
 	}
 	
-	def activate = {
+	def activate:Unit = {
 	  controlTower.start();
 	  println("Torre di Controllo aeroporto di " + name + " attivata" );
 	}
 	
 	def getTimeTable :ArrayBuffer[String] = {
-	  return timetable;
+	  timetable;
 	}
 	
 	
