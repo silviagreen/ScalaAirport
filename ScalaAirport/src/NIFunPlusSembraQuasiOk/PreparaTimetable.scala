@@ -1,4 +1,4 @@
-package FunPlusSembraQuasiOk
+package NIFunPlusSembraQuasiOk
 
 import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
