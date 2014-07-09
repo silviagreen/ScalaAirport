@@ -28,7 +28,7 @@ case object FaiDecollare extends Messaggi
 case object FaiAtterrare extends Messaggi
 case class Decolla(a: Aereo, ritardo: Boolean) extends Messaggi
 case class Atterra(a: Aereo, ritardo: Boolean) extends Messaggi
-case class Done
+case object Done
 case object Start
 case class setTimetable(l: List[String])
 
@@ -71,7 +71,7 @@ class Pista(nPartenze: Int, nArrivi: Int) extends Actor {
   private var partiti = 0
   private var arrivati = 0
   def receive = {
-    case Decolla(a: Aereo, ritardo: Boolean) =>
+    case Decolla(a: Aereo, ritardo: Boolean) => 
       val mittente = sender
       println(a.name + " decolla da " + context.parent.path + " (in ritardo? " + ritardo + ")")
 

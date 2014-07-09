@@ -8,6 +8,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.ActorRef
 import scala.language.implicitConversions
+import com.typesafe.config.ConfigFactory
 
 object Simulazione extends App {
 
@@ -97,6 +98,8 @@ object Simulazione extends App {
       val nome = nomeAeroporto
       system.actorOf(Props(new Aeroporto( nome)), name = nome)
     }
+    
+   
 
     println("NOME" + "\t" + "PARTENZA" + "\t" + "ARRIVO")
     val index = List.range(0, nAeroporti, 1)
