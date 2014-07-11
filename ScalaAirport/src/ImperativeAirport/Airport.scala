@@ -10,6 +10,9 @@ import scala.collection.mutable.ArrayBuffer
  *    	-la tabella dei decolli e atterraggi, in ordine di orario (timetable)
  *     	-la torre di controllo, che gestisce la pista
  * Quando un Aeroporto deve far atterrare/decollare un aereo, fa richiesta alla torre di controllo
+ * 
+ * @constructor	crea un aeroporto
+ * @param	name	nome identificativo dell'aeroporto
  */
 class Airport (n:String){
 	var name: String= n;
@@ -18,15 +21,26 @@ class Airport (n:String){
 	private var controlTower:ControlTower = new ControlTower(this);
 	
 	
-	
+	/**
+	 * Metodo che comunica alla torre di controllo che 
+	 * un aereo deve decollare
+	 */
 	def addDeparture(p:Airplane):Unit  = {
 	  controlTower.addDeparture(p);
 	}
 	
+	/**
+	 * Metodo che comunica alla torre di controllo che 
+	 * un aereo deve atterrare
+	 */
 	def addArrival(p:Airplane):Unit = {
 	  controlTower.addArrival(p);
 	}
 	
+	/**
+	 * Metodo che attiva l'aeroporto iniziando le attività della torre
+	 * di controllo
+	 */
 	def activate:Unit = {
 	  controlTower.start();
 	  println("Torre di Controllo aeroporto di " + name + " attivata" );

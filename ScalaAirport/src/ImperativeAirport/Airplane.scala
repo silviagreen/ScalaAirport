@@ -7,7 +7,12 @@ package ImperativeAirport
  *   	-aeroporto di partenza
  *    	-aeroporto di arrivo
  * Un'aereo decolla (takeOff) e atterra (landing).
- * Quando un aereo deve decollare, lo comunica all'aeroporto di partenza
+ * Quando un aereo deve decollare, lo comunica all'aeroporto di partenza.
+ * 
+ * @constructor	crea un aereo
+ * @param	departure	l'aereoporto di partenza dell'aereo
+ * @param	arrival		l'aeroporto di arrivo dell'aereo
+ * @param	name		nome identificativo dell'aereo
  */
 
 class Airplane (d: Airport, a: Airport, n:String){
