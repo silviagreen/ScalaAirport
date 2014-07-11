@@ -252,6 +252,9 @@ class GestoreDecolli extends Actor {
  * delega la gestione dei decolli e atterraggi degli aerei ai figli.
  * Sucessivamente riceve il messaggio di Start e fa partire un Future che legge la tabella oraria e regola i decolli e gli atterraggi in base a questa
  * Quando riceve il messagio di Stop, l'attore termina
+ * 
+ * @constructor	crea un aeroporto
+ * @param _nome		nome dell'aeroporto
  */
 class Aeroporto(n: String) extends Actor {
   import Names._
@@ -272,6 +275,11 @@ class Aeroporto(n: String) extends Actor {
 
   def timetable_(l: List[String]) = timetable = l
 
+  /**
+   * Future che si occupa di scorrere la timetable
+   * Per ogni "A" gestisce un aereo in arrivo
+   * Per ogni "D" gestisce un aereo in partenza
+   */
   def proxTransito: Future[Unit] = Future {
     _pista = context.actorOf(Props(new Pista(timetable count (_.equalsIgnoreCase("D")), timetable count (_.equalsIgnoreCase("A")))), name = Names.pista)
     implicit val timeout = Timeout(100 seconds)
@@ -280,31 +288,30 @@ class Aeroporto(n: String) extends Actor {
       case x if x > 0 =>
         for (t <- timetable) yield {
           t match {
-            case "D" =>
+            case "D" => //chiede un aereo da far decollare al gestore decolli
               val future = richiestaDecollo ? FaiDecollare
               val result = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
               result match {
-                case Some(a) =>
+                case Some(a) => //se lo ottiene lo fa gestire alla pista...
                   val future2 = pista ? Decolla(a, false)
                   val result = Await.result(future2, timeout.duration).asInstanceOf[String]
                   result match {
-                    case _ =>
+                    case _ => //quando la pista ha terminato di gestirlo, si va avanti
                   }
-                case None =>
+                case None =>	//...altrimenti si va avanti
               }
               Thread.sleep(2000) //attendo che il volo arrivi
-            case "A" =>
+            case "A" =>	//chiede un aereo da far atterrare al gestore atterraggi
               val future = richiestaAtterraggio ? FaiAtterrare
               val results = Await.result(future, timeout.duration).asInstanceOf[Option[Aereo]]
               results match {
-                case Some(a) =>
-
+                case Some(a) => //se lo ottiene lo fa gestire alla pista...
                   val future3 = pista ? Atterra(a, false)
                   val result = Await.result(future3, timeout.duration).asInstanceOf[String]
                   result match {
-                    case _ => 
+                    case _ => //quando la pista ha terminato di gestirlo, si va avanti
                   }
-                case None =>
+                case None =>	//...altrimenti si va avanti
               }
               Thread.sleep(2000) //attendo che il volo arrivi
 

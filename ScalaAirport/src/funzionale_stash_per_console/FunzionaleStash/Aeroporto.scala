@@ -254,13 +254,18 @@ println("creato " + self.path)
  *
  * Ogni attore ha una tabella oraria (settata prima dello start dell'attore) e
  * delega la gestione dei decolli e atterraggi degli aerei ai figli.
- * Sucessivamente riceve il messaggio di Start e fa partire un Future che legge la tabella oraria e regola i decolli e gli atterraggi in base a questa
+ * Sucessivamente dopo aver ricevuto il messaggio di Start
+ * il comportamento della receive viene cambiato così da leggere la tabella oraria 
+ * e regolare i decolli e gli atterraggi in base a questa
  * Quando riceve il messagio di Stop, l'attore termina
+ * 
+ * @constructor	crea un aeroporto
+ * @param _nome		nome dell'aeroporto
  */
 class Aeroporto(n: String) extends Actor with Stash {
   import Names._
   var timetable = List[String]()
-  var nextTransit = 0
+  var nextTransit = 0	//elemento corrente della timetable
   private val _nome = n
   def nome = _nome
 
@@ -276,37 +281,41 @@ class Aeroporto(n: String) extends Actor with Stash {
 
   def timetable_(l: List[String]) = timetable = l
 
+  //comportamento per leggere l'elemento nextTransit della timetable
   def next: Receive = {
     case Next => timetable(nextTransit) match {
-      case "A" =>
-        richiestaAtterraggio ! FaiAtterrare
-        context.become(waitForPlane, discardOld = false)
+      case "A" =>	//gestione atterraggio
+        richiestaAtterraggio ! FaiAtterrare				//delega la richiesta al gestore atterraggi
+        context.become(waitForPlane, discardOld = false)//si mette in attesa della risposta del gestore cambiando comportamento
         unstashAll
-      case "D" =>
-        richiestaDecollo ! FaiDecollare
-        context.become(waitForPlane, discardOld = false)
+      case "D" =>	//gestione decollo
+        richiestaDecollo ! FaiDecollare					//delega la richiesta al gestore decolli
+        context.become(waitForPlane, discardOld = false)//si mette in attesa della risposta del gestore cambiando comportamento
         unstashAll
       case _ => stash
     }
   }
 
+  //comportamento per ricevere la 'risposta' del gestore dei decolli/atterraggi
   def waitForPlane: Receive = {
-    case Some(p: Aereo) if timetable(nextTransit).equalsIgnoreCase("D") =>
-      pista ! Decolla(p, false)
-      context.become(waitForDone, discardOld = false)
+    case Some(p: Aereo) if timetable(nextTransit).equalsIgnoreCase("D") => 
+      //è arrivato un aereo da far decollare
+      pista ! Decolla(p, false)							//delega il decollo alla pista
+      context.become(waitForDone, discardOld = false)	//si mette in attesa della risposta della pista cambiando comportamento
       unstashAll
-    case /*(p:Aereo, "A")*/ Some(p: Aereo) if timetable(nextTransit).equalsIgnoreCase("A") =>
-      pista ! Atterra(p, false)
-      context.become(waitForDone, discardOld = false)
+    case Some(p: Aereo) if timetable(nextTransit).equalsIgnoreCase("A") =>
+      //è arrivato un aereo da far atterrare
+      pista ! Atterra(p, false)							//delega l'atterraggio alla pista
+      context.become(waitForDone, discardOld = false)	//si mette in attesa della risposta della pista cambiando comportamento
       unstashAll
-    case None =>
+    case None =>	//nessun aereo arrivato
       nextTransit += 1
       nextTransit match {
-        case x if x == timetable.size =>
-          context.become(normal, discardOld = false)
+        case x if x == timetable.size =>			//ha terminato di leggere la timetable
+          context.become(normal, discardOld = false)//si mette in attesa del messaggio di stop cambiando comportamento
           unstashAll
-        case x if x < timetable.size =>
-          context.become(next, discardOld = false)
+        case x if x < timetable.size =>				//non ha terminato di leggere la timetable
+          context.become(next, discardOld = false)	//legge il prossimo elemento della timetable cambiando comportamento
           unstashAll
           Thread.sleep(2000)
           self ! Next
@@ -315,15 +324,16 @@ class Aeroporto(n: String) extends Actor with Stash {
     case _ => stash
   }
 
+  //comportamento per attendere la 'risposta' della pista
   def waitForDone: Receive = {
     case Done =>
       nextTransit += 1
       nextTransit match {
-        case x if x == timetable.size =>
-          context.become(normal, discardOld = false)
+        case x if x == timetable.size =>			//ha terminato di leggere la timetable
+          context.become(normal, discardOld = false)//si mette in attesa del messaggio di stop cambiando comportamento
           unstashAll
-        case x if x < timetable.size =>
-          context.become(next, discardOld = false)
+        case x if x < timetable.size =>				//non ha terminato di leggere la timetable
+          context.become(next, discardOld = false)	//legge il prossimo elemento della timetable cambiando comportamento
           unstashAll
           Thread.sleep(2000)
           self ! Next
@@ -331,20 +341,22 @@ class Aeroporto(n: String) extends Actor with Stash {
     case _ => stash
   }
 
+   //comportamento finale
   def normal: Receive = {
-    case Stop => self ! PoisonPill
+    case Stop => self ! PoisonPill  //chiudo l'aeroporto
     case _ => stash
   }
 
+  //comportamento iniziale
   def receive = {
-    case setTimetable(t) =>
+    case setTimetable(t) => //settaggio della timetable
       timetable = t
       println(self.path + "\t" + timetable)
       _pista = context.actorOf(Props(new Pista(timetable count (_.equalsIgnoreCase("D")), timetable count (_.equalsIgnoreCase("A")))), name = Names.pista)
 
-    case Start => timetable.size match {
-      case 0 => self ! PoisonPill
-      case x if x > 0 =>
+    case Start => timetable.size match { //attivazione
+      case 0 => self ! PoisonPill		//se la tabella oraria è vuota, chiudo l'aeroporto
+      case x if x > 0 =>				//altrimenti cambio comportamento per leggere il primo elemento della timetable
         context.become(next, discardOld = false)
         self ! Next
     }
