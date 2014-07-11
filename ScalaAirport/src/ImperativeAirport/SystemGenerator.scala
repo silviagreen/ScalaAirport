@@ -86,6 +86,10 @@ object SystemGenerator {
       println("Inserire due parametri numerici");
     else if (!isAllDigits(args(0)) || !isAllDigits(args(1)))
       println("Inserire due parametri numerici");
+    else if(args(0).toInt < 2)
+      println("Errore: sono richiesti almeno due aeroporti");
+    else if(args(1).toInt < 1)
+      println("Errore: è richiesto almeno un aereo");
     else {
       var nAirport = args(0).toInt;
       var nPlanes = args(1).toInt;

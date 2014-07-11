@@ -56,7 +56,7 @@ import Names._
   def checkInput(x: Any) = (isInteger orElse isStringDigit orElse isCharDigit orElse otherTypes)(x)
 
    /**
-   * Metodo che si occupa di controllare che siano stati inseriti tutti gli inout corretti
+   * Metodo che si occupa di controllare che siano stati inseriti tutti gli input corretti
    * richiesti dal programma
    * 
    * @param		args		array dei parametri inseriti dall'utente
@@ -74,7 +74,16 @@ import Names._
         case true =>
           println("Errore: inseriti parametri non numerici")
           false
-        case false => true
+        case false => nAeroporti.toInt match {
+          case y if y < 2 => println("Errore: Sono richiesti almeno due aeroporti")
+        		  			false
+          case y if y >=2 => nAerei.toInt match {
+        			  case z if z <= 0 => println("Errore: E' richiesto almeno un aereo")
+        					  		false
+        			  case z if z > 0 => true
+        			}
+        }
+        			
       }
     }
 

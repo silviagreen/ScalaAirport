@@ -56,7 +56,7 @@ object Simulazione extends App {
   def checkInput(x: Any) = (isInteger orElse isStringDigit orElse isCharDigit orElse otherTypes)(x)
 
   /**
-   * Metodo che si occupa di controllare che siano stati inseriti tutti gli inout corretti
+   * Metodo che si occupa di controllare che siano stati inseriti tutti gli input corretti
    * richiesti dal programma
    * 
    * @param		args		array dei parametri inseriti dall'utente
@@ -65,7 +65,7 @@ object Simulazione extends App {
    * @param		nAerei		numero di aerei inserito dall'utente
    * 						(lazy: l'utente potrebbe non averlo inserito)
    */
-  def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String ): Boolean = {
+  def checkParameters(args: Array[String], nAeroporti: => String, nAerei: => String /*, correctType: String=>Boolean*/ ): Boolean = {
     args.size match {
       case x if x < 2 =>
         println("Errore: Sono richiesti due parametri numerici")
@@ -74,7 +74,16 @@ object Simulazione extends App {
         case true =>
           println("Errore: inseriti parametri non numerici")
           false
-        case false => true
+        case false => nAeroporti.toInt match {
+          case y if y < 2 => println("Errore: Sono richiesti almeno due aeroporti")
+        		  			false
+          case y if y >=2 => nAerei.toInt match {
+        			  case z if z <= 0 => println("Errore: E' richiesto almeno un aereo")
+        					  		false
+        			  case z if z > 0 => true
+        			}
+        }
+        			
       }
     }
 

@@ -31,12 +31,12 @@ class Airplane (d: Airport, a: Airport, n:String){
 	
 	def takeOff(late:Boolean): Unit  = {
 	  departed = true;
-	  println("Aereo " + name + " e decollato da " + d.name + " in ritardo? " + late);
+	  println("Aereo " + name + " e decollato da " + d.name + " (in ritardo? " + late + ")");
 	}
 	
 	def landing(late:Boolean): Unit = {
 	  arrived = true;
-	   println("Aereo " + name + " e atterrato a " + a.name + " in ritardo? " + late);
+	   println("Aereo " + name + " e atterrato a " + a.name + " (in ritardo? " + late + ")");
 	}
 	
 }
