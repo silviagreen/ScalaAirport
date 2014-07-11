@@ -31,6 +31,7 @@ class ControlTower (a:Airport) extends Thread{
 	  departuresQueue.synchronized{
 	    departuresQueue += p;
 	    departuresQueue.notifyAll();
+	    println(p.name + " aggiunto ai decolli")
 	  }
 	  
 	}
@@ -43,6 +44,7 @@ class ControlTower (a:Airport) extends Thread{
 	  arrivalsQueue.synchronized{
 	    arrivalsQueue += p;
 	    arrivalsQueue.notifyAll();
+	    println(p.name + " aggiunto agli atterraggi")
 	  }
 	}
 	

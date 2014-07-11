@@ -39,12 +39,12 @@ object SystemGenerator {
    * 			false 	altrimenti
    */
   def onlyArrivalsOrEmpty(a: ArrayBuffer[String]): Boolean = {
-    if (a.size == 0) true
+    if (a.size == 0) return true
     for (s <- a) {
       if (s.equalsIgnoreCase("D"))
-        false
+        return false
     }
-    true
+    return true
   }
 
   /**
