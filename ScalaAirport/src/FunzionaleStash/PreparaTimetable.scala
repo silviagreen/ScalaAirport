@@ -6,6 +6,10 @@ import akka.actor.ActorRef
 
 
 //estensione di una classe funzione
+/**
+ * Classe che si occupa di convertire una lista di aerei (che partono da/arrivano in un dato aeroporto)
+ * in una tabella oraria, cioè in una lista di "A" e "D"
+ */
 class createTimetable[-ActorRef] extends Function2[ActorRef, (ActorRef, ActorRef), String] /*(T1, T2) => R*/ {
   def apply(x: ActorRef, y: (ActorRef, ActorRef)) = {
 
@@ -18,10 +22,13 @@ class createTimetable[-ActorRef] extends Function2[ActorRef, (ActorRef, ActorRef
 
 }
 
-//traits
+/**
+ * Classe che, dato un aeroporto, espone il metodo per generare la timetable
+ * 
+ * @constructor		aeroporto	l'aeroporto di cui si vuole costruire la timetable
+ */
 class PreparaTimetable(a: ActorRef) {
   val aeroporto = a
-
 
 /* //versione iterativa dell'argoritmo di inizializzazione della timetable
   def init(l: List[Aereo]) = {
@@ -36,8 +43,10 @@ class PreparaTimetable(a: ActorRef) {
   }
  */ 
   
-//ricorsione
-  def recInit(rest: List[Aereo]): List[String] = {
+/**
+ * Metodo che si occupa di generare ricorsivamente la timetable
+ */
+  def recInit(rest: List[Aereo]): List[String] = {//ricorsione
     val generateTimetable = new createTimetable
     rest match {
       case Nil => Nil
@@ -46,14 +55,20 @@ class PreparaTimetable(a: ActorRef) {
     }
   }
 
+  /**
+   * Metodo che non applica alcuna trasformazione alla lista in input
+   */
   def trasforma(l: List[String]) = l
   
-
 }
-
+//traits
 //trait per normalizzare la timetable
 trait Normalizza extends PreparaTimetable {
 
+  /**
+   * Metodo che si occupa di rendere maiuscole le stringhe della lista in input,
+   * poi applica la trasformazione prevista da super
+   */
   override def trasforma(l: List[String]) = {
     val ln = l map { _.toUpperCase() }
     super.trasforma(ln)
@@ -64,6 +79,11 @@ trait Normalizza extends PreparaTimetable {
 
 //trait per randomizzare la timetable
 trait Randomize extends PreparaTimetable {
+  
+   /**
+   * Metodo che si occupa di randomizzare la lista in input,
+   * poi applica la trasformazione prevista da super
+   */
   override def trasforma(l: List[String]) = {
     val lr = Random.shuffle(l)
     super.trasforma(lr)
@@ -83,8 +103,17 @@ trait StartWithDeparture extends PreparaTimetable {
       a
   }*/
   
-  //FUNZIONALE
-  def swap[T](l:List[T])(i:Int)(j:Int): List[T] = {
+  /**
+   * Funzione currificata ricorsiva che ritorna una lista in output 
+   * uguale a quella di input
+   * ma con l'i-esimo e il j-esimo elemento scambiati
+   * 
+   * @param		l	lista di partenza
+   * @param		i	indice del primo elemento da scambiare
+   * @param		j	indice del secondo elemento da scambiare
+   * @return	lista uguale a l ma con l'i-esimo e il j-esimo elemento scambiati
+   */
+  def swap[T](l:List[T])(i:Int)(j:Int): List[T] = {//FUNZIONALE
     val (l1, rest1) = l.splitAt(i - 1)
     val (l2, rest2) = rest1.drop(1).splitAt(j - 1)
     val l3 = rest2.drop(1)
@@ -93,8 +122,15 @@ trait StartWithDeparture extends PreparaTimetable {
   
 
 
-  //ricorsione
-  def allArrivals(rest: List[String]): Boolean = rest match {
+  /**
+   * Metodo ricorsivo che si occupa di controllare se la lista in input 
+   * è composta di sole "A" o no
+   * 
+   * @param		rest	lista di stringhe da controllare
+   * @return	true	se rest contiene solo "A"
+   * 			false	altrimenti
+   */
+  def allArrivals(rest: List[String]): Boolean = rest match {//ricorsione
     case head :: Nil => head match {
       case "A" => true
       case "D" => false
@@ -107,6 +143,11 @@ trait StartWithDeparture extends PreparaTimetable {
 
   }
 
+   /**
+   * Metodo che si occupa di ritornare una lista in output uguale a quella input l,
+   * ma che inizi con una "D" (se l ne contiene almeno una)
+   * poi applica la trasformazione prevista da super
+   */
   override def trasforma(l: List[String]) = { 
     
     allArrivals(l) match {
