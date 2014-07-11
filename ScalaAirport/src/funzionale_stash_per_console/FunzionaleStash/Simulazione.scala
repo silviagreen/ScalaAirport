@@ -101,7 +101,7 @@ import Names._
    * @param		aerei	lista degli aerei da far decollare
    */
   def decolloAerei(aerei: List[Aereo], system : ActorSystem) = Future{
-    aerei.par foreach { a => println(system.actorSelection(a.partenza.path + "/" + gestoreDecolli))
+    aerei.par foreach { a => 
       system.actorSelection("/user/" + a.partenza.path.name + "/" + gestoreDecolli) ! ChiediDecollo(a)
       Thread.sleep(1500)
     }
