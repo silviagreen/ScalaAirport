@@ -32,7 +32,7 @@ case object Done
 case object Start
 case class setTimetable(l: List[String])
 
-object Names {
+object Names {//nomi degli attori figli di aeroporto
   val pista = "pista"
   val gestoreDecolli = "richiestaDecollo"
   val gestoreAtterraggi = "richiestaAtterraggio"
@@ -42,10 +42,12 @@ object Names {
 //sistema di attori, alcuni hanno un proprio stato interno
 
 /**
- * Classe che rappresenta un Aereo. Ogni aereo ha:
- * 		- nome
- *   	- aeroporto di partenza
- *    	- aeroporto di arrivo
+ * Classe che rappresenta un Aereo. 
+ * 
+ * @constructor	crea un aereo non mutabile
+ * @param	_name		nome identificativo dell'aereo
+ * @param	_partenza	nome dell'aeroporto di partenza
+ * @param	_arrivo		nome dell'aeroporto di arrivo
  */
 class Aereo(p: ActorRef, a: ActorRef, n: String) {
 
@@ -60,10 +62,15 @@ class Aereo(p: ActorRef, a: ActorRef, n: String) {
 
 /**
  * Attore che fa atterrare e decollare gli aerei uno per volta, in base all'ordine di arrivo.
- * Gli aerei sono ricevuti solo dall'aeroporto a cui la pista appartiente (quindi seguendo l'ordine scandito dalla tabella oraria a meno dei ritardi)
+ * Gli aerei sono ricevuti solo dall'aeroporto a cui la pista appartiente 
+ * (quindi seguendo l'ordine scandito dalla tabella oraria a meno dei ritardi)
  * e dal gestore dei ritardi dell'aeroporto.
  * Tiene il conto di quanti decolli e atterraggi sono effettuati;
  * quando sono stati effettuati tutti quelli previsti, manda un messaggio di Stop all'aeroporto
+ * 
+ * @contructor	crea una pista per gli aerei in atterraggio/decollo
+ * @param		nPartenze	numero di partenze totali da effettuare
+ * @param		nArrivi		numero di arrivi totali da effettuare
  */
 class Pista(nPartenze: Int, nArrivi: Int) extends Actor {
   private val partenze = nPartenze
@@ -71,33 +78,41 @@ class Pista(nPartenze: Int, nArrivi: Int) extends Actor {
   private var partiti = 0
   private var arrivati = 0
   def receive = {
+    //l'aereo a deve deve decollare
+    //ritardo è true se a è in ritardo
     case Decolla(a: Aereo, ritardo: Boolean) => 
       val mittente = sender
       println(a.name + " decolla da " + context.parent.path + " (in ritardo? " + ritardo + ")")
-
       partiti = partiti + 1
+      //se sono stati effettuati tutti gli atterraggi e tutti i decolli, allora l'aeroporto ha terminato il suo lavoro
       (partiti == partenze && arrivi == arrivati) match {
         case true => context.parent ! Stop
         case false =>
       }
       Thread.sleep(500) //occupa la pista
+      //a deve atterrare
       (a.arrivo) ! ChiediAtterraggio(a)
 
+       //se l'aereo non era in ritardo, comunico all'aeroporto che il decollo è stato effettuato
       ritardo match {
         case false => mittente ! "Done"
         case true =>
       }
 
+    //l'aereo a deve deve atterrare
+    //ritardo è true se a è in ritardo
     case Atterra(a: Aereo, ritardo: Boolean) =>
       val mittente = sender
       println(a.name + " atterra a " + context.parent.path + " (in ritardo? " + ritardo + ")")
 
       Thread.sleep(500) //occupa la pista
       arrivati = arrivati + 1
+      //se sono stati effettuati tutti gli atterraggi e tutti i decolli, allora l'aeroporto ha terminato il suo lavoro
       (partiti == partenze && arrivi == arrivati) match {
         case true => context.parent ! Stop
         case false =>
       }
+      //se l'aereo non era in ritardo, comunico all'aeroporto che l'atterraggio è stato effettuato
       ritardo match {
         case false => mittente ! "Done"
         case true =>
@@ -117,11 +132,11 @@ class Pista(nPartenze: Int, nArrivi: Int) extends Actor {
 class GestoreRitardi extends Actor {
   import Names._
   def receive = {
-    case DecollaInRitardo(a: Aereo) =>
+    case DecollaInRitardo(a: Aereo) => //comunico alla pista che l'aereo a deve decollare in ritardo
       println(a.name + " decolla in ritardo")
       context.actorSelection("../" + pista) ! Decolla(a, true)
 
-    case AtterraInRitardo(a: Aereo) =>
+    case AtterraInRitardo(a: Aereo) => //comunico alla pista che l'aereo a deve atterrare in ritardo
       println(a.name + " atterra in ritardo")
       context.actorSelection("../" + pista) ! Atterra(a, true)
   }
@@ -148,28 +163,28 @@ class GestoreAtterraggi extends Actor {
 
   def receive = {
 
-    case ChiediAtterraggio(a: Aereo) =>
+    case ChiediAtterraggio(a: Aereo) => //l'aereo a chiede di atterrare
       val mittente = sender
       ritardiA match {
-        case 0 =>
+        case 0 => 			//se non ci sono arrivi in ritardo pendenti, aggiungo l'aereo alla coda...
           println(a.name + " in coda atterraggi")
           arrivi += a
-        case x if x > 0 =>
+        case x if x > 0 =>	//...altrimenti comunico al gestore ritardi che c'è un atterraggio in ritardo da gestire
           println(a.name + " riparte subito, mancano " + ritardiA + " ritardi")
           ritardiA = ritardiA - 1
           context.actorSelection("../" + gestoreRitardi) ! AtterraInRitardo(a)
       }
 
-    case FaiAtterrare =>
+    case FaiAtterrare => //richiesta di inviare un aereo da atterrare
       val mittente = sender
       Try(arrivi.dequeue) match {
-        case Success(aereo) =>
+        case Success(aereo) =>	//se la coda non è vuota, invio un aereo...
           println("ok atterraggio di  " + aereo.name)
           mittente ! Some(aereo)
-        case Failure(f) =>
-          ritardiA = ritardiA + 1
+        case Failure(f) =>			//...altrimenti 
+          ritardiA = ritardiA + 1	//incremento numero di atterraggi in ritardo pendenti
           println("nessun aereo da far atterrare in " + context.parent.path + ", ritardi " + ritardiA)
-          mittente ! None
+          mittente ! None			//e comunico all'aeroporto che non ci sono aerei da far atterrare al momento
 
       }
 
@@ -195,26 +210,26 @@ class GestoreDecolli extends Actor {
   private var ritardi = 0
 
   def receive = {
-    case ChiediDecollo(a: Aereo) =>
+    case ChiediDecollo(a: Aereo) =>	//l'aereo a chiede di decollare
       println(a.name + " chiede decollo")
       val mittente = sender
       ritardi match {
-        case x if x > 0 =>
+        case x if x > 0 =>			//se ci sono partenze in ritardo pendenti, comunico al gestore ritardi che c'è un atterraggio in ritardo da gestire
           println(a.name + " riparte subito, mancano " + ritardi + " ritardi")
           ritardi = ritardi - 1
           context.actorSelection("../" + gestoreRitardi) ! DecollaInRitardo(a)
-        case 0 => partenze += a
+        case 0 => partenze += a		//se non ci sono partenze in ritardo pendenti, aggiungo l'aereo alla coda
       }
-    case FaiDecollare =>
+    case FaiDecollare =>	//richiesta di inviare un aereo da decollare
       val mittente = sender
       Try(partenze.dequeue) match {
-        case Success(aereo) =>
+        case Success(aereo) => //se la coda non è vuota, invio un aereo...
           println("ok decollo di  " + aereo.name)
           mittente ! Some(aereo)
-        case Failure(f) =>
+        case Failure(f) =>	//...altrimenti 
           println("nessun aereo da far decollare in " + context.parent.path + ", ritardi " + ritardi)
-          ritardi = ritardi + 1
-          mittente ! None
+          ritardi = ritardi + 1		//incremento numero di decolli in ritardo pendenti
+          mittente ! None			//e comunico all'aeroporto che non ci sono aerei da far decollare al momento
       }
   }
 
