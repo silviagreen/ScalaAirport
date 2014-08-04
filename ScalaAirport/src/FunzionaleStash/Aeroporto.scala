@@ -19,7 +19,7 @@ import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout
 
-//Messaggi con pattern matching
+//Messaggi con pattern matching  
 abstract class Messaggi
 case class DecollaInRitardo(a: Aereo) extends Messaggi
 case class AtterraInRitardo(a: Aereo) extends Messaggi
